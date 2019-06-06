@@ -38,3 +38,19 @@ def minimum_distance_brouwn(C):
 
 C = codes.LinearCode(random_matrix(GF(5),3,20))
 minimum_distance_brouwn(C)
+
+
+def information_set(M):
+    n = M.nrows()
+    k = M.ncols()
+    # Je vais sauvegarder le resultat de chaque information_set dans une ligne de la matrice resultat
+    res = matrix(n//k,k)
+    M2 = copy(M)
+
+    i = 0
+    while M2.rank() == k:
+        res[i] = M2.pivot()
+
+
+
+

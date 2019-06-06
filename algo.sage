@@ -28,14 +28,9 @@ def minimum_distance_brouwn(C):
             l = l + 1 
         else :
             break 
-            # il faut verifier que les Ai sont dijointe 
+           
 
     print(l)
-    
-    # Mnt je vais trouver le maximum d'informations set que je peux avoir :
-    # Et si la matrice G a une colonne aui est dupplique plusierus fois ? 
-    # Comment trouver le corps sur lequelle les elments sont ecrit ?
-
 
          
     

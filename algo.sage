@@ -26,17 +26,38 @@ def greedy_information_set(M):
     print res  
 
 def infomation_set(G):
+    
     M = copy(G)
-    k = G.nrows()
-    n = G.ncols()
-    res = matrix(k,n)
+    k = M.nrows()
+    n = M.ncols()
+    res = copy(G)
+    res = res*0
     num_info_set = 0
-    while M.rank() == k :
-        num_info_set = num_info_set + 1
-        a = M.pivots()
-        a = list(a)
-        L = M.matrix_from_columns(a)
-        for i in range
+
+    for i in range(0,n//k):
+        
+        n = M.ncols()
+        if M.rank() == k :
+            
+            num_info_set = num_info_set + 1
+            a = M.pivots()
+            a = list(a)
+            L = M.matrix_from_columns(a)
+            
+            for l in range(k):
+                for c in range(k):
+                    res[l,i*k+c] = L[l,c]
+
+            print L
+            print " "
+
+            b = range(n)
+            c = [ i for i in b if i not in a ]
+            M = M.matrix_from_columns(c)
+    
+    print("the number of disjoint information set is : {} ".format(num_info_set))
+    return res.matrix_from_columns(range(num_info_set*k))
+            
 
 
 

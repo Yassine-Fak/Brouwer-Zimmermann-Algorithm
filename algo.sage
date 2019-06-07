@@ -11,7 +11,7 @@ def systematique_form(G):
     return M.echelon_form()
 
 # La fonction suivante rernvoie les informations set, meme ceux aui ne sont pas dijoints
-defreedy_information_set(M):
+def greedy_information_set(M):
     k = M.nrows()
     n = M.ncols()
     Com = Combinations(range(n),k)
@@ -24,6 +24,22 @@ defreedy_information_set(M):
             res = res + [l[i]]
     print(" The number of infomation Sets is : " , num_info_set )  
     print res  
+
+def infomation_set(G):
+    M = copy(G)
+    k = G.nrows()
+    n = G.ncols()
+    res = matrix(k,n)
+    num_info_set = 0
+    while M.rank() == k :
+        num_info_set = num_info_set + 1
+        a = M.pivots()
+        a = list(a)
+        L = M.matrix_from_columns(a)
+        for i in range
+
+
+
 
 
 

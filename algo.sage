@@ -1,6 +1,35 @@
 import sage.coding.linear_code
 import sage.combinat.permutation
 
+def systematique_form(G):
+    M = copy(G)
+    a = M.pivots()
+    b = [ i+1 for i in a ]
+    c = b + [ i for i in range(1, M.ncols()) if i not in b]
+    c = Permutation(c)
+    M.permute_columns(c)
+    return M.echelon_form()
+
+# La fonction suivante rernvoie les informations set, meme ceux aui ne sont pas dijoints
+defreedy_information_set(M):
+    k = M.nrows()
+    n = M.ncols()
+    Com = Combinations(range(n),k)
+    res = []
+    l = Com.list()
+    num_info_set = 0
+    for i in range(len(l)):
+        if M.matrix_from_columns(l[i]).rank() == k:
+            num_info_set = num_info_set + 1
+            res = res + [l[i]]
+    print(" The number of infomation Sets is : " , num_info_set )  
+    print res  
+
+
+
+
+
+
 
 def minimum_distance_brouwn(C):
     G = C.generator_matrix()
@@ -34,23 +63,5 @@ def minimum_distance_brouwn(C):
 
          
     
-
-
 C = codes.LinearCode(random_matrix(GF(5),3,20))
-minimum_distance_brouwn(C)
-
-
-def information_set(M):
-    n = M.nrows()
-    k = M.ncols()
-    # Je vais sauvegarder le resultat de chaque information_set dans une ligne de la matrice resultat
-    res = matrix(n//k,k)
-    M2 = copy(M)
-
-    i = 0
-    while M2.rank() == k:
-        res[i] = M2.pivot()
-
-
-
-
+#minimum_distance_brouwn(C)

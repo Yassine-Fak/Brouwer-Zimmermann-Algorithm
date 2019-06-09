@@ -11,18 +11,8 @@ def systematique_form(G):
     M.permute_columns(c)
     return M.echelon_form()
 
-def fct_auxi(n,I):
-  res = I
-  for i in range(n):
-    if i in I:
-      pass
-    else:
-      res = res + [i]
-  return res
-
-
-
 def infomation_set(G):
+
     M = copy(G)
     k = G.nrows()
     n = G.ncols()
@@ -32,21 +22,16 @@ def infomation_set(G):
 
         a = M.matrix_from_columns(range(num_info_set*k,G.ncols())).pivots()
         b = range(0,num_info_set*k) + [num_info_set*k + i for i in a]
-        c = fct_auxi(G.ncols(),b)
+        c = b
+        for i in range(G.ncols()):
+          if i in b:
+            pass
+          else:
+            c = c + [i]
         d = [i + 1 for i in c]
-        print d
         d = Permutation(d)
         M.permute_columns(d)
         num_info_set = num_info_set + 1
-
-        #c = range(1,num_info_set*k + 1) + [i + num_info_set*k for i in b]
-        #b = [ i+1 for i in a ]
-        #d = c + [ i for i in range(1, G.ncols() + 1) if i not in c]
-        #print c
-
-        #M.matrix_from_columns(range(num_info_set*k,n)).permute_columns(c)
-
-        #n = M.matrix_from_columns(range(num_info_set*k,n)).ncols()
 
     print("the number of disjoint information set is : {} ".format(num_info_set))
     return M
@@ -89,39 +74,12 @@ def infomation_set_ancien(G):
     print("the number of disjoint information set is : {} ".format(num_info_set))
     return res.matrix_from_columns(range(num_info_set*k))
 
-M = random_matrix(GF(2),3,10)
 
 def minimum_distance_brouwn(C):
-    G = C.generator_matrix()
-    n = C.length()
-    k = C.dimension()
-    a = range(1,n + 1)
-    print(a)
-    shuffle(a)
-    print(a)
-    a = Permutation(a)
-    print(" ")
-    print(G)
-    print(" ")
-    G.permute_columns(a)
-    print(G)
-    G = G.echelon_form()
-    print(" ")
-    print(G)
-
-    l = 0
-    for i in range(n//k):
-
-        L = G.matrix_from_columns(range(i*k,(i+1)*k))
-        if L.rank() == k:
-            l = l + 1
-        else :
-            break
-
-
-    print(l)
+    return 0
 
 
 
+M = random_matrix(GF(2),3,10)
 C = codes.LinearCode(random_matrix(GF(5),3,20))
-#minimum_distance_brouwn(C)
+C = codes.LinearCode(random_matrix(GF(7**33),100,550))

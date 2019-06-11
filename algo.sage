@@ -43,24 +43,50 @@ def minimum_distance_brouwn(C):
     G1 = C.generator_matrix()
     k = G1.nrows()
     n = G1.ncols()
+    F = C.base_field()
+    V = VectorSpace(F,k)
     G2 = infomation_set(G1)[0]
     num_info_set = infomation_set(G1)[1]
     ub = n - k + 1
     lb = num_info_set 
     L = []
+    w = 1
     print("The number of disjoint information set is : {} ".format(num_info_set))
     
     for i in range(num_info_set):
 
       A = G2.matrix_from_columns(range(i*k , i*k + k))
       L = L + [A.inverse()*G2]
-      print L[i]
-      print " " 
+      #print L[i]
+      #print " " 
+    #print L
+
+    while w <= k and lb < ub :
+
+      elmts_of_vec_spa = [i for i in V if i.hamming_weight() == w]
+
+      for j in range(0,num_info_set) :
+        for x in elmts_of_vec_spa :
+          ub = min(ub, (x*L[j]).hamming_weight())
+          if ub <= lb :
+            return ub
+        lb = lb + 1
+      w = w + 1
+    return ub 
+          
+        
+
     
 
-    print L
+
+
+
 
 
 
 C = codes.random_linear_code(GF(2),15,3)
 G = C.generator_matrix()
+# http://doc.sagemath.org/html/en/reference/modules/sage/modules/vector_mod2_dense.html
+# http://doc.sagemath.org/html/en/reference/modules/sage/modules/free_module_element.html
+
+

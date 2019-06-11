@@ -11,31 +11,6 @@ def systematique_form(G):
     M.permute_columns(c)
     return M.echelon_form()
 
-def infomation_set(G):
-
-    M = copy(G)
-    k = G.nrows()
-    n = G.ncols()
-    num_info_set = 0
-
-    while M.matrix_from_columns(range(num_info_set*k,G.ncols())).rank() == k:
-
-        a = M.matrix_from_columns(range(num_info_set*k,G.ncols())).pivots()
-        b = range(0,num_info_set*k) + [num_info_set*k + i for i in a]
-        c = b
-        for i in range(G.ncols()):
-          if i in b:
-            pass
-          else:
-            c = c + [i]
-        d = [i + 1 for i in c]
-        d = Permutation(d)
-        M.permute_columns(d)
-        num_info_set = num_info_set + 1
-
-    print("the number of disjoint information set is : {} ".format(num_info_set))
-    return M
-
 
 def infomation_set_ancien(G):
 
@@ -75,11 +50,37 @@ def infomation_set_ancien(G):
     return res.matrix_from_columns(range(num_info_set*k))
 
 
+def infomation_set(G):
+
+    M = copy(G)
+    k = G.nrows()
+    n = G.ncols()
+    num_info_set = 0
+
+    while M.matrix_from_columns(range(num_info_set*k,G.ncols())).rank() == k:
+
+        a = M.matrix_from_columns(range(num_info_set*k,G.ncols())).pivots()
+        b = range(0,num_info_set*k) + [num_info_set*k + i for i in a]
+        c = b
+        for i in range(G.ncols()):
+          if i in b:
+            pass
+          else:
+            c = c + [i]
+        d = [i + 1 for i in c]
+        d = Permutation(d)
+        M.permute_columns(d)
+        num_info_set = num_info_set + 1
+
+    print("the number of disjoint information set is : {} ".format(num_info_set))
+    return M
+
+
 def minimum_distance_brouwn(C):
     return 0
 
 
 
-M = random_matrix(GF(2),3,10)
-C = codes.LinearCode(random_matrix(GF(5),3,20))
-C = codes.LinearCode(random_matrix(GF(7**33),100,550))
+#M = random_matrix(GF(2),3,10)
+#C = codes.LinearCode(random_matrix(GF(5),3,20))
+#C = codes.LinearCode(random_matrix(GF(7**33),100,550))

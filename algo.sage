@@ -76,14 +76,6 @@ def minimum_distance_brouwn(C):
           
         
 
-    
-
-
-
-
-
-
-
 C = codes.random_linear_code(GF(2),15,3)
 G = C.generator_matrix()
 # http://doc.sagemath.org/html/en/reference/modules/sage/modules/vector_mod2_dense.html

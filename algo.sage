@@ -12,54 +12,16 @@ def systematique_form(G):
     return M.echelon_form()
 
 
-def infomation_set_ancien(G):
-
-    M = copy(G)
-    k = M.nrows()
-    n = M.ncols()
-    res = copy(G)
-    res = res*0
-    num_info_set = 0
-
-    for i in range(0,n//k):
-
-        n = M.ncols()
-        if M.rank() == k :
-
-            num_info_set = num_info_set + 1
-            a = M.pivots()
-            a = list(a)
-            print a
-            L = M.matrix_from_columns(a)
-
-            for l in range(k):
-                for c in range(k):
-                    res[l,i*k+c] = L[l,c]
-
-            print L
-            print " "
-            print(L.rank())
-            print " "
-
-            b = range(n)
-            c = [ i for i in b if i not in a ]
-            print c
-            M = M.matrix_from_columns(c)
-
-    print("the number of disjoint information set is : {} ".format(num_info_set))
-    return res.matrix_from_columns(range(num_info_set*k))
-
-
 def infomation_set(G):
 
     M = copy(G)
     k = G.nrows()
-    n = G.ncols()
     num_info_set = 0
+    L = M.matrix_from_columns(range(num_info_set*k,G.ncols()))
 
-    while M.matrix_from_columns(range(num_info_set*k,G.ncols())).rank() == k:
+    while L.rank() == k:
 
-        a = M.matrix_from_columns(range(num_info_set*k,G.ncols())).pivots()
+        a = L.pivots()
         b = range(0,num_info_set*k) + [num_info_set*k + i for i in a]
         c = b
         for i in range(G.ncols()):
@@ -71,16 +33,34 @@ def infomation_set(G):
         d = Permutation(d)
         M.permute_columns(d)
         num_info_set = num_info_set + 1
+        L = M.matrix_from_columns(range(num_info_set*k,G.ncols()))
 
-    print("the number of disjoint information set is : {} ".format(num_info_set))
-    return M
+    return (M,num_info_set)
 
 
 def minimum_distance_brouwn(C):
-    return 0
+
+    G1 = C.generator_matrix()
+    k = G1.nrows()
+    n = G1.ncols()
+    G2 = infomation_set(G1)[0]
+    num_info_set = infomation_set(G1)[1]
+    ub = n - k + 1
+    lb = num_info_set 
+    L = []
+    print("The number of disjoint information set is : {} ".format(num_info_set))
+    
+    for i in range(num_info_set):
+
+      A = G2.matrix_from_columns(range(i*k , i*k + k))
+      L = L + [A.inverse()*G2]
+      print L[i]
+      print " " 
+    
+
+    print L
 
 
 
-#M = random_matrix(GF(2),3,10)
-#C = codes.LinearCode(random_matrix(GF(5),3,20))
-#C = codes.LinearCode(random_matrix(GF(7**33),100,550))
+C = codes.random_linear_code(GF(2),15,3)
+G = C.generator_matrix()

@@ -35,7 +35,7 @@ def infomation_set(G):
 
     return (M,num_info_set)
 
-def infomation_set_brouwer(G, maxiter = 100):
+def infomation_set_brouwer(G, maxiter = 150):
 
     k = G.nrows()
     n = G.ncols()
@@ -45,20 +45,19 @@ def infomation_set_brouwer(G, maxiter = 100):
 
     while i < maxiter and num_info_set != q :
 
-        print i
-        print " "
         anc_num_info_set = num_info_set
+        anc_M = copy(M)
         p = Permutations(n).random_element()
         M = copy(G)
         M.permute_columns(p)
         M, num_info_set = infomation_set(M)
 
-        if anc_num_info_set > num_info_set : 
-          M.permute_columns(p.inverse())
+        if anc_num_info_set > num_info_set :
+          M = copy(anc_M)
           num_info_set = anc_num_info_set
 
         i = i + 1
-    
+
     return (M,num_info_set)
 
 
@@ -77,14 +76,14 @@ def infomation_set_brouwer_zimmer(G, maxiter = 100):
       anc_M = copy(M)
 
       M, num_info_set = infomation_set_brouwer(M, 1)
-      if anc_num_info_set > num_info_set : 
+      if anc_num_info_set > num_info_set :
         num_info_set = anc_num_info_set
         M = copy(anc_M)
 
 
 
 
-      i = i + 1 
+      i = i + 1
 
 
 
@@ -100,20 +99,20 @@ def minimum_distance_brouwer(C):
     n = G1.ncols()
     F = C.base_field()
     V = VectorSpace(F,k)
-    G2, num_info_set = infomation_set(G1) 
+    G2, num_info_set = infomation_set(G1)
     ub = n - k + 1
-    lb = num_info_set 
+    lb = num_info_set
     L = []
     w = 1
-    
+
     print("The number of disjoint information set is : {} ".format(num_info_set))
-    
+
     for i in range(num_info_set):
 
       A = G2.matrix_from_columns(range(i*k , i*k + k))
       L = L + [A.inverse()*G2]
       #print L[i]
-      #print " " 
+      #print " "
     #print L
 
     while w <= k and lb < ub :
@@ -127,14 +126,13 @@ def minimum_distance_brouwer(C):
             return ub
         lb = lb + 1
       w = w + 1
-    return ub 
-          
+    return ub
 
-C = codes.random_linear_code(GF(2),15,3)
+
+C = codes.random_linear_code(GF(2),46,3)
+C = codes.random_linear_code(GF(2),61,5)
 G = C.generator_matrix()
 Permutations(4).random_element()
 
 # http://doc.sagemath.org/html/en/reference/modules/sage/modules/vector_mod2_dense.html
 # http://doc.sagemath.org/html/en/reference/modules/sage/modules/free_module_element.html
-
-

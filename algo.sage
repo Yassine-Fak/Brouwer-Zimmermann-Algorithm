@@ -36,6 +36,37 @@ def infomation_set(G):
     return (M,num_info_set)
 
 
+def infomation_set_brouwn(G, maxiter = 50):
+
+    M = copy(G)
+    k = G.nrows()
+    n = G.ncols()
+    q = n//k
+    M, num_info_set = infomation_set(M)
+    i = 0
+
+    while i < maxiter and num_info_set == q :
+
+        anc_num_info_set = num_info_set
+        p = Permutations(n).random_element()
+        M.permute_columns(p)
+        M, num_info_set = infomation_set(M)
+
+        if anc_num_info_set > num_info_set : 
+          M.permute_columns(p.inverse())
+          num_info_set = anc_num_info_set
+
+        i = i + 1
+    
+    return (M,num_info_set)
+
+
+
+
+
+
+
+
 def minimum_distance_brouwn(C):
 
     G1 = C.generator_matrix()
@@ -43,8 +74,7 @@ def minimum_distance_brouwn(C):
     n = G1.ncols()
     F = C.base_field()
     V = VectorSpace(F,k)
-    G2 = infomation_set(G1)[0]
-    num_info_set = infomation_set(G1)[1]
+    G2, num_info_set = infomation_set(G1) 
     ub = n - k + 1
     lb = num_info_set 
     L = []
@@ -76,6 +106,8 @@ def minimum_distance_brouwn(C):
 
 C = codes.random_linear_code(GF(2),15,3)
 G = C.generator_matrix()
+Permutations(4).random_element()
+
 # http://doc.sagemath.org/html/en/reference/modules/sage/modules/vector_mod2_dense.html
 # http://doc.sagemath.org/html/en/reference/modules/sage/modules/free_module_element.html
 

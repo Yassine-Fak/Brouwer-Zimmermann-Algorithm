@@ -51,6 +51,7 @@ def minimum_distance_brouwn(C):
     lb = num_info_set 
     L = []
     w = 1
+    
     print("The number of disjoint information set is : {} ".format(num_info_set))
     
     for i in range(num_info_set):
@@ -74,7 +75,6 @@ def minimum_distance_brouwn(C):
       w = w + 1
     return ub 
           
-        
 
 C = codes.random_linear_code(GF(2),15,3)
 G = C.generator_matrix()

@@ -1,5 +1,3 @@
-import sage.coding.linear_code
-import sage.combinat.permutation
 
 
 def systematique_form(G):

@@ -35,20 +35,21 @@ def infomation_set(G):
 
     return (M,num_info_set)
 
+def infomation_set_brouwer(G, maxiter = 100):
 
-def infomation_set_brouwn(G, maxiter = 50):
-
-    M = copy(G)
     k = G.nrows()
     n = G.ncols()
+    M, num_info_set = infomation_set(G)
     q = n//k
-    M, num_info_set = infomation_set(M)
     i = 0
 
-    while i < maxiter and num_info_set == q :
+    while i < maxiter and num_info_set != q :
 
+        print i
+        print " "
         anc_num_info_set = num_info_set
         p = Permutations(n).random_element()
+        M = copy(G)
         M.permute_columns(p)
         M, num_info_set = infomation_set(M)
 
@@ -62,12 +63,37 @@ def infomation_set_brouwn(G, maxiter = 50):
 
 
 
+def infomation_set_brouwer_zimmer(G, maxiter = 100):
+
+    k = G.nrows()
+    n = G.ncols()
+    # Mnt je maximise le nombre d'information set
+    M, num_info_set = infomation_set_brouwer(G, maxiter)
+    i = 0
+
+    while i < maxiter and M.matrix_from_columns(range(num_info_set*k,G.ncols())).rank() != n%k :
+
+      anc_num_info_set = num_info_set
+      anc_M = copy(M)
+
+      M, num_info_set = infomation_set_brouwer(M, 1)
+      if anc_num_info_set > num_info_set : 
+        num_info_set = anc_num_info_set
+        M = copy(anc_M)
+
+
+
+
+      i = i + 1 
 
 
 
 
 
-def minimum_distance_brouwn(C):
+
+
+
+def minimum_distance_brouwer(C):
 
     G1 = C.generator_matrix()
     k = G1.nrows()

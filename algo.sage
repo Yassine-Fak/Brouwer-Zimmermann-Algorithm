@@ -35,7 +35,7 @@ def infomation_set(G):
 
     return (M,num_info_set)
 
-def infomation_set_brouwer(G, maxiter = 150):
+def infomation_set_brouwer_ancien(G, maxiter = 150):
 
     k = G.nrows()
     n = G.ncols()
@@ -61,6 +61,30 @@ def infomation_set_brouwer(G, maxiter = 150):
     return (M,num_info_set)
 
 
+def infomation_set_brouwer(G, maxiter = 150):
+
+    k = G.nrows()
+    n = G.ncols()
+    M, num_info_set = infomation_set(G)
+    q = n//k
+    i = 0
+
+    while i < maxiter and num_info_set != q :
+      
+      M_inter = copy(G)
+      p = Permutations(n).random_element()
+      M_inter.permute_columns(p)
+      M_inter, num_info_set_inter = infomation_set(M_inter)
+
+      if num_info_set_inter > num_info_set :
+        M = copy(M_inter)
+        num_info_set = num_info_set_inter
+      
+      i = i + 1
+
+    return (M,num_info_set)
+
+
 
 def infomation_set_brouwer_zimmer(G, maxiter = 100):
 
@@ -78,6 +102,8 @@ def infomation_set_brouwer_zimmer(G, maxiter = 100):
       p = Permutations(n).random_element()
       M.permute_columns(p)
       M, num_info_set = infomation_set(M)
+      R = M.matrix_from_columns(range(num_info_set*k,n))
+      anc_R = anc_M.matrix_from_columns(range(num_info_set*k,n))
 
       if num_info_set < anc_num_info_set :
         M = copy(anc_M)
@@ -87,11 +113,11 @@ def infomation_set_brouwer_zimmer(G, maxiter = 100):
       if num_info_set > anc_num_info_set :
         continue
       
-      if num_info_set == q and M.matrix_from_columns(range(num_info_set*k,n)).rank() == r :
+      if num_info_set == q and R.rank() == r :
         break 
       
       if num_info_set == anc_num_info_set :
-        if M.matrix_from_columns(range(num_info_set*k,n)).rank() >= anc_M.matrix_from_columns(range(num_info_set*k,n)).rank() :
+        if R.rank() >= anc_R.rank() :
           continue
         
         else : 

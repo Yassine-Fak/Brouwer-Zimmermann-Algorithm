@@ -45,18 +45,18 @@ def infomation_set_brouwer(G, maxiter = 150):
 
     while i < maxiter and num_info_set != q :
 
-        anc_num_info_set = num_info_set
-        anc_M = copy(M)
-        M = copy(G)
-        p = Permutations(n).random_element()
-        M.permute_columns(p)
-        M, num_info_set = infomation_set(M)
+      anc_num_info_set = num_info_set
+      anc_M = copy(M)
+      M = copy(G)
+      p = Permutations(n).random_element()
+      M.permute_columns(p)
+      M, num_info_set = infomation_set(M)
 
-        if anc_num_info_set > num_info_set :
-          M = copy(anc_M)
-          num_info_set = anc_num_info_set
-        
-        i = i + 1
+      if anc_num_info_set > num_info_set :
+        M = copy(anc_M)
+        num_info_set = anc_num_info_set
+      
+      i = i + 1
 
     return (M,num_info_set)
 
@@ -99,7 +99,7 @@ def infomation_set_brouwer_zimmer(G, maxiter = 100):
           num_info_set = anc_num_info_set
         
     return (M,num_info_set)
-    
+
 
 def list_of_system_gen_mat(M,m):
 

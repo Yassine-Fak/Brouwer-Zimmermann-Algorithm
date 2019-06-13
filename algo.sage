@@ -47,15 +47,15 @@ def infomation_set_brouwer(G, maxiter = 150):
 
         anc_num_info_set = num_info_set
         anc_M = copy(M)
-        p = Permutations(n).random_element()
         M = copy(G)
+        p = Permutations(n).random_element()
         M.permute_columns(p)
         M, num_info_set = infomation_set(M)
 
         if anc_num_info_set > num_info_set :
           M = copy(anc_M)
           num_info_set = anc_num_info_set
-
+        
         i = i + 1
 
     return (M,num_info_set)
@@ -66,30 +66,51 @@ def infomation_set_brouwer_zimmer(G, maxiter = 100):
 
     k = G.nrows()
     n = G.ncols()
-    # Mnt je maximise le nombre d'information set
-    M, num_info_set = infomation_set_brouwer(G, maxiter)
-    i = 0
+    M, num_info_set = infomation_set(G)
+    q = n//k
+    r = n%k
+    
+    for i in range(maxiter):
 
-    while i < maxiter and M.matrix_from_columns(range(num_info_set*k,G.ncols())).rank() != n%k :
-
-      anc_num_info_set = num_info_set
       anc_M = copy(M)
+      anc_num_info_set = num_info_set
+      M = copy(G)
+      p = Permutations(n).random_element()
+      M.permute_columns(p)
+      M, num_info_set = infomation_set(M)
 
-      M, num_info_set = infomation_set_brouwer(M, 1)
-      if anc_num_info_set > num_info_set :
-        num_info_set = anc_num_info_set
+      if num_info_set < anc_num_info_set :
         M = copy(anc_M)
+        num_info_set = anc_num_info_set
+        continue
 
+      if num_info_set > anc_num_info_set :
+        continue
+      
+      if num_info_set == q and M.matrix_from_columns(range(num_info_set*k,n)).rank() == r :
+        break 
+      
+      if num_info_set == anc_num_info_set :
+        if M.matrix_from_columns(range(num_info_set*k,n)).rank() >= anc_M.matrix_from_columns(range(num_info_set*k,n)).rank() :
+          continue
+        
+        else : 
+          M = copy(anc_M)
+          num_info_set = anc_num_info_set
+        
+    return (M,num_info_set)
+    
 
+def list_of_system_gen_mat(M,m):
 
+    k = M.nrows()
+    L = []
 
-      i = i + 1
-
-
-
-
-
-
+    for i in range(m):
+      A = M.matrix_from_columns(range(i*k , i*k + k))
+      L = L + [A.inverse()*M]
+    
+    return L
 
 
 def minimum_distance_brouwer(C):
@@ -99,21 +120,13 @@ def minimum_distance_brouwer(C):
     n = G1.ncols()
     F = C.base_field()
     V = VectorSpace(F,k)
-    G2, num_info_set = infomation_set(G1)
+    G2, num_info_set = infomation_set_brouwer(G1)
+    L = list_of_system_gen_mat(G2,num_info_set)
     ub = n - k + 1
     lb = num_info_set
-    L = []
     w = 1
 
     print("The number of disjoint information set is : {} ".format(num_info_set))
-
-    for i in range(num_info_set):
-
-      A = G2.matrix_from_columns(range(i*k , i*k + k))
-      L = L + [A.inverse()*G2]
-      #print L[i]
-      #print " "
-    #print L
 
     while w <= k and lb < ub :
 
@@ -130,9 +143,6 @@ def minimum_distance_brouwer(C):
 
 
 C = codes.random_linear_code(GF(2),46,3)
-C = codes.random_linear_code(GF(2),61,5)
+#C = codes.random_linear_code(GF(2),61,5)
 G = C.generator_matrix()
-Permutations(4).random_element()
 
-# http://doc.sagemath.org/html/en/reference/modules/sage/modules/vector_mod2_dense.html
-# http://doc.sagemath.org/html/en/reference/modules/sage/modules/free_module_element.html

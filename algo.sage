@@ -1,5 +1,4 @@
 
-
 def systematique_form(G):
     M = copy(G)
     a = M.pivots()
@@ -30,38 +29,12 @@ def infomation_set(G):
         d = [i + 1 for i in c]
         d = Permutation(d)
         M.permute_columns(d)
-        num_info_set = num_info_set + 1
+        num_info_set += 1
         L = M.matrix_from_columns(range(num_info_set*k,G.ncols()))
 
     return (M,num_info_set)
 
-def infomation_set_brouwer_ancien(G, maxiter = 150):
-
-    k = G.nrows()
-    n = G.ncols()
-    M, num_info_set = infomation_set(G)
-    q = n//k
-    i = 0
-
-    while i < maxiter and num_info_set != q :
-
-      anc_num_info_set = num_info_set
-      anc_M = copy(M)
-      M = copy(G)
-      p = Permutations(n).random_element()
-      M.permute_columns(p)
-      M, num_info_set = infomation_set(M)
-
-      if anc_num_info_set > num_info_set :
-        M = copy(anc_M)
-        num_info_set = anc_num_info_set
-      
-      i = i + 1
-
-    return (M,num_info_set)
-
-
-def infomation_set_brouwer(G, maxiter = 150):
+def infomation_set_brouwer(G, maxiter = 200):
 
     k = G.nrows()
     n = G.ncols()
@@ -80,50 +53,57 @@ def infomation_set_brouwer(G, maxiter = 150):
         M = copy(M_inter)
         num_info_set = num_info_set_inter
       
-      i = i + 1
+      i += 1
 
     return (M,num_info_set)
 
 
-
-def infomation_set_brouwer_zimmer(G, maxiter = 100):
+def infomation_set_brouwer_zimmer(G, maxiter = 200):
 
     k = G.nrows()
     n = G.ncols()
     M, num_info_set = infomation_set(G)
+    R = M.matrix_from_columns(range(num_info_set*k,n))
     q = n//k
     r = n%k
+    i = 0
     
-    for i in range(maxiter):
+    while i < maxiter and num_info_set != q and R.rank() != r:
 
-      anc_M = copy(M)
-      anc_num_info_set = num_info_set
-      M = copy(G)
+      M_inter = copy(G)
       p = Permutations(n).random_element()
-      M.permute_columns(p)
-      M, num_info_set = infomation_set(M)
-      R = M.matrix_from_columns(range(num_info_set*k,n))
-      anc_R = anc_M.matrix_from_columns(range(num_info_set*k,n))
+      M_inter.permute_columns(p)
+      M_inter, num_info_set_inter = infomation_set(M_inter)
+      R_inter = M_inter.matrix_from_columns(range(num_info_set_inter*k,n))
 
-      if num_info_set < anc_num_info_set :
-        M = copy(anc_M)
-        num_info_set = anc_num_info_set
+      if num_info_set_inter > num_info_set :
+        M = copy(M_inter)
+        R = copy(R_inter)
+        num_info_set = num_info_set_inter
+        i += 1
         continue
 
-      if num_info_set > anc_num_info_set :
+      if num_info_set_inter < num_info_set :
+        i += 1
         continue
       
-      if num_info_set == q and R.rank() == r :
-        break 
-      
-      if num_info_set == anc_num_info_set :
-        if R.rank() >= anc_R.rank() :
+      if num_info_set == num_info_set_inter :
+
+        if R.rank() >= R_inter.rank() :
+          i += 1
           continue
-        
-        else : 
-          M = copy(anc_M)
-          num_info_set = anc_num_info_set
-        
+
+        else :
+          M = copy(M_inter)
+          R = copy(R_inter)
+          i += 1
+          continue
+      
+      if num_info_set_inter == q and R_inter.rank() == r :
+        M = copy(M_inter)
+        num_info_set = num_info_set_inter
+        break
+
     return (M,num_info_set)
 
 
@@ -163,8 +143,8 @@ def minimum_distance_brouwer(C):
           ub = min(ub, (x*L[j]).hamming_weight())
           if ub <= lb :
             return ub
-        lb = lb + 1
-      w = w + 1
+        lb += 1
+      w += 1
     return ub
 
 

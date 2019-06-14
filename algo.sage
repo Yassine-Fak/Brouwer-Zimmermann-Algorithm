@@ -8,31 +8,31 @@ def systematique_form(G):
     M.permute_columns(c)
     return M.echelon_form()
 
-
 def infomation_set(G):
 
     M = copy(G)
     k = G.nrows()
     num_info_set = 0
-    L = M.matrix_from_columns(range(num_info_set*k,G.ncols()))
+    L = M.matrix_from_columns(range(num_info_set*k,G.ncols())).echelon_form()
 
     while L.rank() == k:
 
-        a = L.pivots()
-        b = range(0,num_info_set*k) + [num_info_set*k + i for i in a]
-        c = b
-        for i in range(G.ncols()):
-          if i in b:
-            pass
-          else:
-            c = c + [i]
-        d = [i + 1 for i in c]
-        d = Permutation(d)
-        M.permute_columns(d)
-        num_info_set += 1
-        L = M.matrix_from_columns(range(num_info_set*k,G.ncols()))
+      a = L.pivots()
+      b = range(0,num_info_set*k) + [num_info_set*k + i for i in a]
+      c = b
+      for i in range(G.ncols()):
+        if i in b:
+          pass
+        else:
+          c = c + [i]
+      d = [i + 1 for i in c]
+      d = Permutation(d)
+      M.permute_columns(d)
+      num_info_set += 1
+      L = M.matrix_from_columns(range(num_info_set*k,G.ncols())).echelon_form()
 
     return (M,num_info_set)
+   
 
 def infomation_set_brouwer(G, maxiter = 200):
 
@@ -41,7 +41,7 @@ def infomation_set_brouwer(G, maxiter = 200):
     M, num_info_set = infomation_set(G)
     q = n//k
     i = 0
-
+    
     while i < maxiter and num_info_set != q :
       
       M_inter = copy(G)

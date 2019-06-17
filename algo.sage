@@ -1,3 +1,5 @@
+from sage.combinat.gray_codes import combinations
+
 
 def systematique_form(G):
     M = copy(G)
@@ -119,7 +121,7 @@ def list_of_system_gen_mat(M,m):
     return L
 
 
-def minimum_distance_brouwer(C):
+def minimum_distance_brouwer_ancien(C):
 
     G1 = C.generator_matrix()
     k = G1.nrows()
@@ -151,4 +153,56 @@ def minimum_distance_brouwer(C):
 C = codes.random_linear_code(GF(2),46,3)
 #C = codes.random_linear_code(GF(2),61,5)
 G = C.generator_matrix()
+
+# http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/combination.html
+# http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/gray_codes.html
+
+
+def minimum_distance_brouwer(C):
+
+    G1 = C.generator_matrix()
+    n,k = C.length(), C.dimension()
+    F = C.base_field()
+    g = F.multiplicative_generator()
+    q = F.cardinality() 
+
+    G2, num_info_set = infomation_set_brouwer(G1)
+    L = list_of_system_gen_mat(G2,num_info_set)
+    ub = n - k + 1 
+    lb = num_info_set
+    w = 1
+
+    print("The number of disjoint information set is : {} ".format(num_info_set))
+
+    while w <= k and lb < ub :
+
+      for m in range(0,num_info_set) : # pour calculer G22 = L[m]
+
+        for x in [g**t for t in range(q-1)]: # pour enumerer les element du corps 
+          X = zero_matrix(1,k)
+          for e in range(w):
+            X[0,e] = x
+          X = X[0]
+          X = list(X)
+          ub = min(ub, (X*L[m]).hamming_weight())
+          if ub <= lb :
+            return ub
+          for i,j in combinations(k,w): # il faut discuter le cas lorsque on met x de partout
+            X[i] = 0
+            X[j] = x
+            ub = min(ub, (X*L[m]).hamming_weight())
+            if ub <= lb :
+              return ub
+        # Ici je traite le cas lorsqu'on a uniquement un seul element dans la liste X 
+
+
+        lb += 1     
+
+      w += 1
+
+    # le prb est aue ca genere uniauement tous les mots de pd = 1, et le pd = 2, 3 4 ???????
+
+    return ub
+
+
 

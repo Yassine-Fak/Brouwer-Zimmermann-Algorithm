@@ -165,64 +165,40 @@ def minimum_distance_brouwer(C):
     F = C.base_field()
     g = F.multiplicative_generator()
     q = F.cardinality()
-
-    V = [g**t for t in range(q-1)]
-
     G2, num_info_set = infomation_set_brouwer(G1)
     L = list_of_system_gen_mat(G2,num_info_set)
     ub = n - k + 1
     lb = num_info_set
     w = 1
-    M = []
-    
-    for i in V:
-      M = M + [[i]]
 
     print("The number of disjoint information set is : {} ".format(num_info_set))
 
     while w <= k and lb < ub :
 
       for m in range(0,num_info_set) : # pour calculer G22 = L[m]
-
-        # Ici je traite le cas lorsqu'on a uniquement un seul element dans la liste X
-        if w == 1 :
-          for x V: # pour enumerer les element du corps
-            X = zero_matrix(1,k)
-            for e in range(w):
-              X[0,e] = x
-            X = X[0]
-            X = list(X)
+        X = zero_matrix(1,k)
+        for e in range(w):
+          X[0,e] = g**0
+        X = X[0]
+        X = vector(X)
+        X_inter = copy(X)
+        for i in range((q-1)**w) :
+          X = incr_vector(X,F)
+          ub = min(ub, (X*L[m]).hamming_weight())
+          if ub <= lb :
+            return ub
+        X = copy(X_inter)
+        for i,j in combinations(k,w):
+          X[i] = 0; X[j] = 1
+          X_inter = copy(X)
+          for i in range((q-1)**w) :
+            X = incr_vector(X,F)
             ub = min(ub, (X*L[m]).hamming_weight())
             if ub <= lb :
               return ub
-            for i,j in combinations(k,w): # il faut discuter le cas lorsque on met x de partout
-              X[i] = 0
-              X[j] = x
-              ub = min(ub, (X*L[m]).hamming_weight())
-              if ub <= lb :
-                return ub
-        
-        else :
-          
-          for e in range(w):
-            X[0,e] = g**0
-          X = X[0]
-          X = list(X)
-          L = []
-          for i in M :
-            for j in V :
-              L = L + [i+[j]]
-
-
-
-        
-
-
+          X = copy(X_inter)
         lb += 1
-
       w += 1
-
-
     return ub
 
 
@@ -248,7 +224,25 @@ V = GF(5)
 q = 5
 F = [V.multiplicative_generator()**t for t in range(q-1)]
 X = [1, 1, 1, 0, 0]
+X= (1,0,1,0,1,0,0)
+X = vector(X)
 
 for i,j in combinations(5,3):
-  b[i] = 0; b[j] = 1 
+  b[i] = 0; b[j] = 1
   print(b)
+
+def incr_vector(X,F):
+    s = X.support()
+    s.reverse()
+    g = F.multiplicative_generator()
+    q = F.cardinality()
+    c = 0
+    for i in s:
+      if X[i] == g**(q-2) :
+        c += 1
+        pass
+      else :
+        L = [t for t in range(q-1) if g**t == X[i]]
+        X[i] = g**(L[0]+1)
+        break
+    return X

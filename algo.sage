@@ -200,7 +200,7 @@ def minimum_distance_brouwer(C):
 
       w += 1
 
-    # le prb est aue ca genere uniauement tous les mots de pd = 1, et le pd = 2, 3 4 ???????
+    # le prb est que ca genere uniquement tous les mots de pd = 1, et le pd = 2, 3 4 ???????
 
     return ub
 
@@ -208,3 +208,14 @@ def minimum_distance_brouwer(C):
 # http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/permutation.html?highlight=permutation#module-sage.combinat.permutation
 # a = [1, 2, 3, 4, 0, 0, 0, 0]
 # S = Permutations(a).list()
+#  L = []
+#for i in M:
+#....:     for j in F:
+#....:         L = L + [i+[j]]
+
+#sage: for i in F:
+#....:     M = M + [[i]]
+
+# V = GF(4)
+# F = [V.multiplicative_generator()**i for i in range(3)]
+

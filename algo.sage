@@ -230,12 +230,25 @@ def minimum_distance_brouwer(C):
 # a = [1, 2, 3, 4, 0, 0, 0, 0]
 # S = Permutations(a).list()
 #  L = []
-#for i in M:
-#....:     for j in F:
-#....:         L = L + [i+[j]]
+# for i in M:
+# ....:     for j in F:
+# ....:         L = L + [i+[j]]
 
-#sage: for i in F:
-#....:     M = M + [[i]]
+# sage: for i in F:
+# ....:     M = M + [[i]]
 
 # V = GF(4)
 # F = [V.multiplicative_generator()**i for i in range(3)]
+# https://www.diveinto.org/python3/advanced-iterators.html
+
+
+
+
+V = GF(5)
+q = 5
+F = [V.multiplicative_generator()**t for t in range(q-1)]
+X = [1, 1, 1, 0, 0]
+
+for i,j in combinations(5,3):
+  b[i] = 0; b[j] = 1 
+  print(b)

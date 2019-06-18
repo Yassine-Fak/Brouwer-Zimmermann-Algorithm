@@ -166,11 +166,17 @@ def minimum_distance_brouwer(C):
     g = F.multiplicative_generator()
     q = F.cardinality()
 
+    V = [g**t for t in range(q-1)]
+
     G2, num_info_set = infomation_set_brouwer(G1)
     L = list_of_system_gen_mat(G2,num_info_set)
     ub = n - k + 1
     lb = num_info_set
     w = 1
+    M = []
+    
+    for i in V:
+      M = M + [[i]]
 
     print("The number of disjoint information set is : {} ".format(num_info_set))
 
@@ -178,29 +184,44 @@ def minimum_distance_brouwer(C):
 
       for m in range(0,num_info_set) : # pour calculer G22 = L[m]
 
-        for x in [g**t for t in range(q-1)]: # pour enumerer les element du corps
-          X = zero_matrix(1,k)
-          for e in range(w):
-            X[0,e] = x
-          X = X[0]
-          X = list(X)
-          ub = min(ub, (X*L[m]).hamming_weight())
-          if ub <= lb :
-            return ub
-          for i,j in combinations(k,w): # il faut discuter le cas lorsque on met x de partout
-            X[i] = 0
-            X[j] = x
+        # Ici je traite le cas lorsqu'on a uniquement un seul element dans la liste X
+        if w == 1 :
+          for x V: # pour enumerer les element du corps
+            X = zero_matrix(1,k)
+            for e in range(w):
+              X[0,e] = x
+            X = X[0]
+            X = list(X)
             ub = min(ub, (X*L[m]).hamming_weight())
             if ub <= lb :
               return ub
-        # Ici je traite le cas lorsqu'on a uniquement un seul element dans la liste X
+            for i,j in combinations(k,w): # il faut discuter le cas lorsque on met x de partout
+              X[i] = 0
+              X[j] = x
+              ub = min(ub, (X*L[m]).hamming_weight())
+              if ub <= lb :
+                return ub
+        
+        else :
+          
+          for e in range(w):
+            X[0,e] = g**0
+          X = X[0]
+          X = list(X)
+          L = []
+          for i in M :
+            for j in V :
+              L = L + [i+[j]]
+
+
+
+        
 
 
         lb += 1
 
       w += 1
 
-    # le prb est que ca genere uniquement tous les mots de pd = 1, et le pd = 2, 3 4 ???????
 
     return ub
 
@@ -218,4 +239,3 @@ def minimum_distance_brouwer(C):
 
 # V = GF(4)
 # F = [V.multiplicative_generator()**i for i in range(3)]
-

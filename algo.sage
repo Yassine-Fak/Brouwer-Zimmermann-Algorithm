@@ -120,51 +120,24 @@ def list_of_system_gen_mat(M,m):
 
     return L
 
-
-def minimum_distance_brouwer_ancien(C):
-
-    G1 = C.generator_matrix()
-    k = G1.nrows()
-    n = G1.ncols()
-    F = C.base_field()
-    V = VectorSpace(F,k)
-    G2, num_info_set = infomation_set_brouwer(G1)
-    L = list_of_system_gen_mat(G2,num_info_set)
-    ub = n - k + 1
-    lb = num_info_set
-    w = 1
-
-    print("The number of disjoint information set is : {} ".format(num_info_set))
-
-    while w <= k and lb < ub :
-
-      elmts_of_vec_spa = [i for i in V if i.hamming_weight() == w]
-
-      for j in range(0,num_info_set) :
-        for x in elmts_of_vec_spa :
-          ub = min(ub, (x*L[j]).hamming_weight())
-          if ub <= lb :
-            return ub
-        lb += 1
-      w += 1
-    return ub
-
-
-
 def incr_vector(X,F):
-    s = X.support()
-    s.reverse()
-    g = F.multiplicative_generator()
-    q = F.cardinality()
-    for i in s:
-      if X[i] == g**(q-2) :
-        pass
-      else :
-        L = [t for t in range(q-1) if g**t == X[i]]
-        X[i] = g**(L[0]+1)
-        break
-    return X
+  V = copy(X)
+  V = vector(V)
+  s = V.support()
+  g = F.multiplicative_generator()
+  q = F.cardinality()
 
+  if V[s[len(s)-1]] != g**(q-2) :
+    L = [t for t in range(q) if g**t == V[s[len(s)-1]] ]
+    V[s[len(s)-1]] = g**(L[0]+1)
+  else :
+    V[s[len(s)-1]] = g**0
+    X_inter = [V[i] for i in range(s[len(s)-1])]
+    X_inter = vector(X_inter)
+    X_inter = incr_vector(X_inter,F) 
+    V = list(X_inter) + [V[i] for i in range(s[len(s)-1],len(V))]
+    V = vector(V)
+  return V
 
 def minimum_distance_brouwer(C):
 
@@ -190,7 +163,7 @@ def minimum_distance_brouwer(C):
         ub = min(ub, (X*L[m]).hamming_weight())
         if ub <= lb :
           return ub
-        for i in range((q-1)**w) :
+        for i in range((q-1)**w-1) :
           X = incr_vector(X,F)
           ub = min(ub, (X*L[m]).hamming_weight())
           if ub <= lb :
@@ -202,7 +175,7 @@ def minimum_distance_brouwer(C):
           ub = min(ub, (X*L[m]).hamming_weight())
           if ub <= lb :
             return ub
-          for i in range((q-1)**w) :
+          for i in range((q-1)**w-1) :
             X = incr_vector(X,F)
             ub = min(ub, (X*L[m]).hamming_weight())
             if ub <= lb :

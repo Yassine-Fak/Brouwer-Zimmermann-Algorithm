@@ -150,12 +150,20 @@ def minimum_distance_brouwer_ancien(C):
     return ub
 
 
-C = codes.random_linear_code(GF(2),46,3)
-#C = codes.random_linear_code(GF(2),61,5)
-G = C.generator_matrix()
 
-# http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/combination.html
-# http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/gray_codes.html
+def incr_vector(X,F):
+    s = X.support()
+    s.reverse()
+    g = F.multiplicative_generator()
+    q = F.cardinality()
+    for i in s:
+      if X[i] == g**(q-2) :
+        pass
+      else :
+        L = [t for t in range(q-1) if g**t == X[i]]
+        X[i] = g**(L[0]+1)
+        break
+    return X
 
 
 def minimum_distance_brouwer(C):
@@ -176,73 +184,49 @@ def minimum_distance_brouwer(C):
     while w <= k and lb < ub :
 
       for m in range(0,num_info_set) : # pour calculer G22 = L[m]
-        X = zero_matrix(1,k)
+        X = zero_vector(k)
         for e in range(w):
-          X[0,e] = g**0
-        X = X[0]
-        X = vector(X)
-        X_inter = copy(X)
+          X[e] = g**0
+        ub = min(ub, (X*L[m]).hamming_weight())
+        if ub <= lb :
+          return ub
         for i in range((q-1)**w) :
           X = incr_vector(X,F)
           ub = min(ub, (X*L[m]).hamming_weight())
           if ub <= lb :
             return ub
-        X = copy(X_inter)
+        for v in X.support() :
+          X[v] = g**0
         for i,j in combinations(k,w):
           X[i] = 0; X[j] = 1
-          X_inter = copy(X)
+          ub = min(ub, (X*L[m]).hamming_weight())
+          if ub <= lb :
+            return ub
           for i in range((q-1)**w) :
             X = incr_vector(X,F)
             ub = min(ub, (X*L[m]).hamming_weight())
             if ub <= lb :
               return ub
-          X = copy(X_inter)
+          for v in X.support() :
+            X[v] = g**0
         lb += 1
       w += 1
     return ub
 
 
+
+C = codes.random_linear_code(GF(2),46,3)
+G = C.generator_matrix()
+X= (1,0,1,0,1,0,0)
+
+# http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/combination.html
+# http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/gray_codes.html
 # http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/permutation.html?highlight=permutation#module-sage.combinat.permutation
-# a = [1, 2, 3, 4, 0, 0, 0, 0]
-# S = Permutations(a).list()
-#  L = []
-# for i in M:
-# ....:     for j in F:
-# ....:         L = L + [i+[j]]
-
-# sage: for i in F:
-# ....:     M = M + [[i]]
-
-# V = GF(4)
-# F = [V.multiplicative_generator()**i for i in range(3)]
 # https://www.diveinto.org/python3/advanced-iterators.html
 
 
 
 
-V = GF(5)
-q = 5
-F = [V.multiplicative_generator()**t for t in range(q-1)]
-X = [1, 1, 1, 0, 0]
-X= (1,0,1,0,1,0,0)
-X = vector(X)
 
-for i,j in combinations(5,3):
-  b[i] = 0; b[j] = 1
-  print(b)
 
-def incr_vector(X,F):
-    s = X.support()
-    s.reverse()
-    g = F.multiplicative_generator()
-    q = F.cardinality()
-    c = 0
-    for i in s:
-      if X[i] == g**(q-2) :
-        c += 1
-        pass
-      else :
-        L = [t for t in range(q-1) if g**t == X[i]]
-        X[i] = g**(L[0]+1)
-        break
-    return X
+

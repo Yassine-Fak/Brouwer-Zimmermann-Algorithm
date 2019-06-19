@@ -1,6 +1,5 @@
 from sage.combinat.gray_codes import combinations
 
-
 def systematique_form(G):
     M = copy(G)
     a = M.pivots()
@@ -132,10 +131,10 @@ def incr_vector(X,F):
     V[s[len(s)-1]] = g**(L[0]+1)
   else :
     V[s[len(s)-1]] = g**0
-    X_inter = [V[i] for i in range(s[len(s)-1])]
-    X_inter = vector(X_inter)
-    X_inter = incr_vector(X_inter,F) 
-    V = list(X_inter) + [V[i] for i in range(s[len(s)-1],len(V))]
+    V_inter = [V[i] for i in range(s[len(s)-1])]
+    V_inter = vector(V_inter)
+    V_inter = incr_vector(V_inter,F) 
+    V = list(V_inter) + [V[i] for i in range(s[len(s)-1],len(V))]
     V = vector(V)
   return V
 
@@ -157,31 +156,45 @@ def minimum_distance_brouwer(C):
     while w <= k and lb < ub :
 
       for m in range(0,num_info_set) : # pour calculer G22 = L[m]
+
         X = zero_vector(k)
         for e in range(w):
           X[e] = g**0
-        ub = min(ub, (X*L[m]).hamming_weight())
+        A = zero_vector(n)
+        for i in range(n):
+          for j in range(w):
+            A[i] += L[m].row(j)[i]
+        ub = min(ub, A.hamming_weight())
         if ub <= lb :
           return ub
+
         for i in range((q-1)**w-1) :
           X = incr_vector(X,F)
-          ub = min(ub, (X*L[m]).hamming_weight())
+          ub = min(ub, (X*L[m]).hamming_weight()) # Produit matriciel a voir 
           if ub <= lb :
             return ub
         for v in X.support() :
           X[v] = g**0
+
         for i,j in combinations(k,w):
+
           X[i] = 0; X[j] = 1
-          ub = min(ub, (X*L[m]).hamming_weight())
+          A = zero_vector(n)
+          for i in range(n):
+            for j in X.support() :
+              A[i] += L[m].row(j)[i]
+          ub = min(ub, A.hamming_weight())
           if ub <= lb :
             return ub
+
           for i in range((q-1)**w-1) :
             X = incr_vector(X,F)
-            ub = min(ub, (X*L[m]).hamming_weight())
+            ub = min(ub, (X*L[m]).hamming_weight()) # Produit matriciel a voir
             if ub <= lb :
               return ub
           for v in X.support() :
             X[v] = g**0
+
         lb += 1
       w += 1
     return ub
@@ -192,8 +205,6 @@ C = codes.random_linear_code(GF(2),46,3)
 G = C.generator_matrix()
 X= (1,0,1,0,1,0,0)
 
-# http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/combination.html
-# http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/gray_codes.html
 # http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/permutation.html?highlight=permutation#module-sage.combinat.permutation
 # https://www.diveinto.org/python3/advanced-iterators.html
 

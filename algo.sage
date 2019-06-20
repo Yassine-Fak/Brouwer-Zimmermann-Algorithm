@@ -108,15 +108,13 @@ def infomation_set_brouwer_zimmer(G, maxiter = 200):
     return (M,num_info_set)
 
 
-def list_of_system_gen_mat(M,m):
+def list_of_system_gen_mat(M,m,k):
 
-    k = M.nrows()
     L = []
-
     for i in range(m):
       A = M.matrix_from_columns(range(i*k , i*k + k))
       L = L + [A.inverse()*M]
-
+      
     return L
 
 def incr_vector(X,F):
@@ -147,7 +145,7 @@ def minimum_distance_brouwer(C):
     g = F.multiplicative_generator()
     q = F.cardinality()
     G2, num_info_set = infomation_set_brouwer(G1)
-    L = list_of_system_gen_mat(G2,num_info_set)
+    L = list_of_system_gen_mat(G2,num_info_set,k)
     ub = n - k + 1
     lb = num_info_set
     w = 1
@@ -172,6 +170,8 @@ def minimum_distance_brouwer(C):
         
         a = [0]*w
         for i in range(1,(q-1)**w):
+          if F == Gf(2) :
+            break
           a_anc = copy(a)
           a = Z(i).digits(q-1,padto=w)
           a.reverse()
@@ -201,6 +201,8 @@ def minimum_distance_brouwer(C):
             return ub
           
           for i in range(1,(q-1)**w):
+            if F == GF(2):
+              break
             a_anc = copy(a)
             a = Z(i).digits(q-1,padto=w)
             a.reverse()

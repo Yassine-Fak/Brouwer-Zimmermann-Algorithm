@@ -160,55 +160,64 @@ def minimum_distance_brouwer(C):
         X = zero_vector(k)
         for e in range(w):
           X[e] = g**0
+
         A = zero_vector(n)
-        for i in range(n):
-          for j in range(w):
-            A[i] += L[m].row(j)[i]
+        for i in range(w):
+          A += L[m].row(i)
+
         ub = min(ub, A.hamming_weight())
         if ub <= lb :
           return ub
 
-        for i in range((q-1)**w-1) :
-          X = incr_vector(X,F)
-          ub = min(ub, (X*L[m]).hamming_weight()) # Produit matriciel a voir 
+        for i in range(1,(q-1)**w):
+          a = Z(i).digits(q-1,padto=w)
+          a.reverse()
+          X = [g**i for i in a] + [0]*(k-w)
+          X = vector(X)
+          ub = min(ub, (X*L[m]).hamming_weight()) # Produit matriciel a voir
           if ub <= lb :
             return ub
-        for v in X.support() :
+
+        for v in range(w) :
           X[v] = g**0
 
         for i,j in combinations(k,w):
 
-          X[i] = 0; X[j] = 1
+          X[i] = 0; X[j] = g**0
+          S = X.support()
           A = zero_vector(n)
-          for i in range(n):
-            for j in X.support() :
-              A[i] += L[m].row(j)[i]
+          for i in S :
+            A += L[m].row(i)
+
           ub = min(ub, A.hamming_weight())
           if ub <= lb :
             return ub
-
-          for i in range((q-1)**w-1) :
-            X = incr_vector(X,F)
+          
+          for i in range(1,(q-1)**w):
+            a = Z(i).digits(q-1,padto=w)
+            a.reverse()
+            c = 0
+            for z in S :
+              X[z] = g**(a[c])
+              c = c + 1
             ub = min(ub, (X*L[m]).hamming_weight()) # Produit matriciel a voir
             if ub <= lb :
               return ub
-          for v in X.support() :
+
+          for v in S :
             X[v] = g**0
 
         lb += 1
       w += 1
     return ub
 
-
-
 C = codes.random_linear_code(GF(2),46,3)
 G = C.generator_matrix()
 X= (1,0,1,0,1,0,0)
+Z = IntegerRing()
 
 # http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/permutation.html?highlight=permutation#module-sage.combinat.permutation
 # https://www.diveinto.org/python3/advanced-iterators.html
-
-
 
 
 

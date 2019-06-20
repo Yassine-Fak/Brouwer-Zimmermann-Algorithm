@@ -138,8 +138,79 @@ def incr_vector(X,F):
     V = vector(V)
   return V
 
-
 def minimum_distance_brouwer(C):
+
+    G1 = C.generator_matrix()
+    n,k = C.length(), C.dimension()
+    F = C.base_field()
+    g = F.multiplicative_generator()
+    q = F.cardinality()
+    G2, num_info_set = infomation_set_brouwer(G1)
+    L = list_of_system_gen_mat(G2,num_info_set)
+    ub = n - k + 1
+    lb = num_info_set
+    w = 1
+
+    print("The number of disjoint information set is : {} ".format(num_info_set))
+
+    while w <= k and lb < ub :
+
+      for m in range(0,num_info_set) : # pour calculer G22 = L[m]
+
+        X = zero_vector(k)
+        for e in range(w):
+          X[e] = g**0
+        A = zero_vector(n)
+        for i in range(n):
+          for j in range(w):
+            A[i] += L[m].row(j)[i]
+        ub = min(ub, A.hamming_weight())
+        if ub <= lb :
+          return ub
+
+        for i in range((q-1)**w-1) :
+          X = incr_vector(X,F)
+          ub = min(ub, (X*L[m]).hamming_weight()) # Produit matriciel a voir 
+          if ub <= lb :
+            return ub
+        for v in X.support() :
+          X[v] = g**0
+
+        for i,j in combinations(k,w):
+
+          X[i] = 0; X[j] = 1
+          A = zero_vector(n)
+          for i in range(n):
+            for j in X.support() :
+              A[i] += L[m].row(j)[i]
+          ub = min(ub, A.hamming_weight())
+          if ub <= lb :
+            return ub
+
+          for i in range((q-1)**w-1) :
+            X = incr_vector(X,F)
+            ub = min(ub, (X*L[m]).hamming_weight()) # Produit matriciel a voir
+            if ub <= lb :
+              return ub
+          for v in X.support() :
+            X[v] = g**0
+
+        lb += 1
+      w += 1
+    return ub
+
+
+
+C = codes.random_linear_code(GF(2),46,3)
+G = C.generator_matrix()
+X= (1,0,1,0,1,0,0)
+
+# http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/permutation.html?highlight=permutation#module-sage.combinat.permutation
+# https://www.diveinto.org/python3/advanced-iterators.html
+
+
+
+def minimum_distance_brouwer_bis(C):
 
     G1 = C.generator_matrix()
     n,k = C.length(), C.dimension()
@@ -169,19 +240,13 @@ def minimum_distance_brouwer(C):
         ub = min(ub, A.hamming_weight())
         if ub <= lb :
           return ub
-        
-        a = [0]*w
+
         for i in range(1,(q-1)**w):
-          a_anc = copy(a)
           a = Z(i).digits(q-1,padto=w)
           a.reverse()
           X = [g**i for i in a] + [0]*(k-w)
           X = vector(X)
-
-          for i in (vector(a)- vector(a_anc)).support() : 
-            A += (g^a[i] - g^a_anc[i])*L[m].row(i)
-
-          ub = min(ub, A.hamming_weight()) 
+          ub = min(ub, (X*L[m]).hamming_weight()) # Produit matriciel a voir
           if ub <= lb :
             return ub
 
@@ -201,18 +266,13 @@ def minimum_distance_brouwer(C):
             return ub
           
           for i in range(1,(q-1)**w):
-            a_anc = copy(a)
             a = Z(i).digits(q-1,padto=w)
             a.reverse()
             c = 0
             for z in S :
               X[z] = g**(a[c])
               c = c + 1
-            
-            for i in (vector(a)- vector(a_anc)).support() :
-              A += (g^a[i] - g^a_anc[i])*L[m].row(i)
-            
-            ub = min(ub, A.hamming_weight()) 
+            ub = min(ub, (X*L[m]).hamming_weight()) # Produit matriciel a voir
             if ub <= lb :
               return ub
 
@@ -223,14 +283,31 @@ def minimum_distance_brouwer(C):
       w += 1
     return ub
 
-C = codes.random_linear_code(GF(2),100,11)
-#C = codes.random_linear_code(GF(2),100,25)
-#time C.minimum_distance()
-#time minimum_distance_brouwer(C)
-G = C.generator_matrix()
-X= (1,0,1,0,1,0,0)
+F = GF(5)
 Z = IntegerRing()
+q = 5
+g = F.multiplicative_generator()
+w = 3
+c = []
+L = []
+for i in range((q-1)**w):
+  a = Z(i).digits(q-1,padto=w)
+  b =copy(a)
+  b.reverse()
+  c = [g**i for i in b]
+  L = L + [c]
+  print c
 
-# http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/permutation.html?highlight=permutation#module-sage.combinat.permutation
-# https://www.diveinto.org/python3/advanced-iterators.html
+print "  " 
+
+X = (1,1,1)
+L2 = [list(X)]
+for i in range((q-1)**w-1):
+  print X
+  X = incr_vector(X,F)
+  L2 = L2 + [list(X)]
+
+
+
+
 

@@ -136,7 +136,6 @@ def incr_vector(X,F):
     V = vector(V)
   return V
 
-
 def minimum_distance_brouwer(C):
 
     G1 = C.generator_matrix()
@@ -144,13 +143,41 @@ def minimum_distance_brouwer(C):
     F = C.base_field()
     g = F.multiplicative_generator()
     q = F.cardinality()
-    G2, num_info_set = infomation_set_brouwer(G1)
+    G2, num_info_set = infomation_set_brouwer(G1,3)
     L = list_of_system_gen_mat(G2,num_info_set,k)
     ub = n - k + 1
     lb = num_info_set
     w = 1
 
     print("The number of disjoint information set is : {} ".format(num_info_set))
+
+    if F == GF(2) :
+      while w <= k and lb < ub :
+        for m in range(0,num_info_set) : # pour calculer G22 = L[m]
+          
+          X = zero_vector(k)
+          for e in range(w):
+            X[e] = g**0
+
+          A = zero_vector(n)
+          for i in range(w):
+            A += L[m].row(i)
+          ub = min(ub, A.hamming_weight())
+          if ub <= lb :
+            return ub
+          
+          for i,j in combinations(k,w):
+            X[i] = 0; X[j] = g**0
+            A = zero_vector(n)
+            for i in X.support() :
+              A += L[m].row(i)
+            
+            ub = min(ub, A.hamming_weight())
+            if ub <= lb :
+              return ub
+          lb += 1
+        w += 1
+      return ub
 
     while w <= k and lb < ub :
 
@@ -163,15 +190,12 @@ def minimum_distance_brouwer(C):
         A = zero_vector(n)
         for i in range(w):
           A += L[m].row(i)
-
         ub = min(ub, A.hamming_weight())
         if ub <= lb :
           return ub
         
         a = [0]*w
         for i in range(1,(q-1)**w):
-          if F == Gf(2) :
-            break
           a_anc = copy(a)
           a = Z(i).digits(q-1,padto=w)
           a.reverse()
@@ -201,8 +225,6 @@ def minimum_distance_brouwer(C):
             return ub
           
           for i in range(1,(q-1)**w):
-            if F == GF(2):
-              break
             a_anc = copy(a)
             a = Z(i).digits(q-1,padto=w)
             a.reverse()

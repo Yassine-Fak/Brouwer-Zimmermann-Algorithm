@@ -136,15 +136,6 @@ def incr_vector(X,F):
     V = vector(V)
   return V
 
-
-
-
-
-
-
-
-
-
 def minimum_distance_brouwer(C):
 
     G1 = C.generator_matrix()
@@ -250,10 +241,10 @@ def minimum_distance_brouwer(C):
     return ub
 
 
-C = codes.random_linear_code(GF(7),40,5) # pr ceului la je trouve un resultat different
+C = codes.random_linear_code(GF(7),40,5) #pr ceului la je trouve un resultat different
 C = codes.random_linear_code(GF(17),15,4) #Lui aussi renvoie un resultat differents
 
-C = codes.random_linear_code(GF(13),30,9) #A tester normalement cest 14 (Jai limpression que le mien est mieux en terme de temps )
+C = codes.random_linear_code(GF(13),30,9) #A tester (Cela met du temps) normalement cest 14 (Jai limpression que le mien est mieux en terme de temps )
 C = codes.random_linear_code(GF(5),50,11) # = 24
 
 C = codes.random_linear_code(GF(5),44,5)
@@ -268,24 +259,27 @@ Z = IntegerRing()
 # http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/permutation.html?highlight=permutation#module-sage.combinat.permutation
 # https://www.diveinto.org/python3/advanced-iterators.html
 
+F = GF(5)
+q = 5
+w = 2
+k = 3
+X = [1,2,0]
+for i,j in combinations(k,w):
+  X[j] = X[i] ; X[i] = F.zero() 
+  print X
 
-a = [0]*w
-for i in xrange(33,43):
-  a_anc = copy(a)
-  a = Z(i).digits(q-1,padto=w) # a modifier
-  X = [g^(a[w-1-i]) for i in xrange(w)] + [0]*(k-w)
-  X = vector(X)
-  print a
-  print (vector(a)- vector(a_anc)).support()
 
-print " "
+X = [1,2,3,0,0,0]
+for i,j in combinations(6,3):
+  X[j]=X[i] ; X[i]=0
+  print X
+# Ici je n'ai pas le mot (1,0,0,3,2,0) par exemple
+# http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/permutation.html?highlight=arrangement%20combination#sage.combinat.permutation.Arrangements
 
-a = [0]*w
-for i in xrange(33,43):
-  a_anc = copy(a)
-  a = Z(i).digits(q-1,padto=w) # a modifier
-  a.reverse()
-  X = [g^(a[w-1-i]) for i in xrange(w)] + [0]*(k-w)
-  X = vector(X)
-  print a
-  print (vector(a)- vector(a_anc)).support()
+
+X = [1,2,3,0,0,0]
+P = Permutations_mset(X)
+P.list()
+
+X = [1,2,3,0,0,0]
+A = Arrangements(X,6).list()

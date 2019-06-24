@@ -138,6 +138,13 @@ def incr_vector(X,F):
 
 
 
+
+
+
+
+
+
+
 def minimum_distance_brouwer(C):
 
     G1 = C.generator_matrix()
@@ -196,7 +203,7 @@ def minimum_distance_brouwer(C):
         a = [0]*w
         for i in xrange(1,(q-1)^w):
           a_anc = copy(a)
-          a = Z(i).digits(q-1,padto=w) # a modifier
+          a = Z(i).digits(q-1,padto=w) 
           X = [g^(a[w-1-i]) for i in xrange(w)] + [0]*(k-w)
           X = vector(X)
 
@@ -216,22 +223,21 @@ def minimum_distance_brouwer(C):
           A = L[m].row(S[0])
           for i in xrange(1-w,0) :
             A += L[m].row(S[i])
-
           ub = min(ub, A.hamming_weight())
           if ub <= lb :
             return ub
-
+          
           for i in range(1,(q-1)**w):
             a_anc = copy(a)
             a = Z(i).digits(q-1,padto=w)
-            a.reverse()
-            c = 0
+            c = 1
             for z in S :
-              X[z] = g**(a[c])
-              c = c + 1
-
-            for i in (vector(a)- vector(a_anc)).support() :
-              A += (g^a[i] - g^a_anc[i])*L[m].row(i)
+              X[z] = g**(a[w-c])
+              c += 1
+            
+            for j in (vector(a) - vector(a_anc)).support():
+              A += (g^a[j] - g^a_anc[j])*L[m].row(w-1-j)
+            
             ub = min(ub, A.hamming_weight())
             if ub <= lb :
               return ub
@@ -243,10 +249,12 @@ def minimum_distance_brouwer(C):
       w += 1
     return ub
 
+
 C = codes.random_linear_code(GF(7),40,5) # pr ceului la je trouve un resultat different
 C = codes.random_linear_code(GF(17),15,4) #Lui aussi renvoie un resultat differents
 
-C = codes.random_linear_code(GF(13),30,9) #A tester
+C = codes.random_linear_code(GF(13),30,9) #A tester normalement cest 14 (Jai limpression que le mien est mieux en terme de temps )
+C = codes.random_linear_code(GF(5),50,11) # = 24
 
 C = codes.random_linear_code(GF(5),44,5)
 C = codes.random_linear_code(GF(2),100,11)

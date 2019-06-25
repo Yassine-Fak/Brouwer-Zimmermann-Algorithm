@@ -218,7 +218,7 @@ def minimum_distance_brouwer(C):
           if ub <= lb :
             return ub
           
-          for i in range(1,(q-1)**w):
+          for i in xrange(1,(q-1)^w):
             a_anc = copy(a)
             a = Z(i).digits(q-1,padto=w)
             c = 1
@@ -241,45 +241,41 @@ def minimum_distance_brouwer(C):
     return ub
 
 
-C = codes.random_linear_code(GF(7),40,5) #pr ceului la je trouve un resultat different
-C = codes.random_linear_code(GF(17),15,4) #Lui aussi renvoie un resultat differents
-
+C = codes.random_linear_code(GF(7),40,5) 
+C = codes.random_linear_code(GF(17),15,4)
 C = codes.random_linear_code(GF(13),30,9) #A tester (Cela met du temps) normalement cest 14 (Jai limpression que le mien est mieux en terme de temps )
 C = codes.random_linear_code(GF(5),50,11) # = 24
 
 C = codes.random_linear_code(GF(5),44,5)
 C = codes.random_linear_code(GF(2),100,11)
-#C = codes.random_linear_code(GF(2),100,25)
-#time C.minimum_distance()
-#time minimum_distance_brouwer(C)
-G = C.generator_matrix()
-X= (1,0,1,0,1,0,0)
-Z = IntegerRing()
+C = codes.random_linear_code(GF(2),100,25)
+
 
 # http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/permutation.html?highlight=permutation#module-sage.combinat.permutation
 # https://www.diveinto.org/python3/advanced-iterators.html
 
-F = GF(5)
-q = 5
-w = 2
-k = 3
-X = [1,2,0]
-for i,j in combinations(k,w):
-  X[j] = X[i] ; X[i] = F.zero() 
-  print X
 
 
-X = [1,2,3,0,0,0]
+X1 = [1,2,3,0,0,0]
+X2 = [1,3,2,0,0,0]
+X3 = [2,1,3,0,0,0]
+X4 = [2,3,1,0,0,0]
+X5 = [3,1,2,0,0,0]
+X6 = [3,2,1,0,0,0]
+L = [X1] + [X2] + [X3] + [X4] + [X5] + [X6] 
 for i,j in combinations(6,3):
-  X[j]=X[i] ; X[i]=0
-  print X
-# Ici je n'ai pas le mot (1,0,0,3,2,0) par exemple
-# http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/permutation.html?highlight=arrangement%20combination#sage.combinat.permutation.Arrangements
-
-
-X = [1,2,3,0,0,0]
-P = Permutations_mset(X)
-P.list()
+  X1[j]=X1[i] ; X1[i]=0
+  X = copy(X6)
+  L = L + [X]
 
 X = [1,2,3,0,0,0]
 A = Arrangements(X,6).list()
+# Ici je vais faire ca pour tous les Xi
+# Et on aura A == L (apres avoir les mettre sous forme de sort)
+# La conclusion est qu'on aura TOUS les mots !!!!!!! comme si on fait Arrangements(X,6).list() 
+
+
+X = [1,2,3,0,0,0]
+P = sage.combinat.permutation.Permutations_mset(X)
+P.list()
+

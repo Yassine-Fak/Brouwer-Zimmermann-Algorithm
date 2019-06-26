@@ -291,7 +291,6 @@ def minimum_distance_brouwer_opti(C):
         for i in xrange(1,(q-1)^w):
           a_anc = copy(a)
           a = Z(i).digits(q-1,padto=w) 
-
           for i in (vector(a) - vector(a_anc)).support() :
             A += (g^a[i] - g^a_anc[i])*L[m].row(w-1-i)
           ub = min(ub, A.hamming_weight())
@@ -302,7 +301,7 @@ def minimum_distance_brouwer_opti(C):
         for i,j in combinations(k,w):
           S.remove(i)
           S.append(j)
-          S.sort()
+          #S.sort()
           A = L[m].row(S[0])
           for i in xrange(1-w,0) :
             A += L[m].row(S[i])
@@ -341,6 +340,10 @@ def minimum_distance_brouwer_nouveau(C):
     if F == GF(2) :
       while w <= k and lb < ub :
         for m in xrange(0,num_info_set) : # pour calculer G22 = L[m]
+          X = zero_vector(k)
+          for e in xrange(w):
+            X[e] = F.one()
+
           A = L[m].row(0)
           for i in xrange(1,w):
             A += L[m].row(i)
@@ -359,6 +362,10 @@ def minimum_distance_brouwer_nouveau(C):
 
     while w <= k and lb < ub :
       for m in xrange(0,num_info_set) : # pour calculer G22 = L[m]
+        X = zero_vector(k)
+        for e in xrange(w):
+          X[e] = F.one()
+
         A = L[m].row(0)
         for i in xrange(1,w):
           A += L[m].row(i)
@@ -378,7 +385,7 @@ def minimum_distance_brouwer_nouveau(C):
         for i in xrange(1,(q-1)^w):
           a_anc = copy(a)
           a = Z(i).digits(q-1,padto=w) 
-          X = [g^(a[w-1-i]) for i in xrange(w)] + [0]*(k-w)
+          X = [g^(a[w-1-i]) for i in xrange(w)] + [F.zero()]*(k-w)
           X = vector(X) 
           for i in (vector(a) - vector(a_anc)).support() :
             A += (g^a[i] - g^a_anc[i])*L[m].row(w-1-i)
@@ -388,8 +395,9 @@ def minimum_distance_brouwer_nouveau(C):
             return ub
 
           A_anc = copy(A) 
-          for i,j in combinations(k,w): 
-            A += X[i]*(L[m].row(j) - L[m].row(i))
+          for i,j in combinations(k,w):
+            X[j]=X[i] ; X[i]=F.zero()
+            A += X[j]*(L[m].row(j) - L[m].row(i))
             ub = min(ub, A.hamming_weight())
             if ub <= lb :
               return ub
@@ -398,25 +406,26 @@ def minimum_distance_brouwer_nouveau(C):
       w += 1
     return ub
 
-# le meilleur c'est opti!!!! mais demain il faut ameliorer le nv car une fois sur 4 donne mauvais resultat
+
 
 C = codes.random_linear_code(GF(7),40,5) 
 C = codes.random_linear_code(GF(17),15,4)
+
 C = codes.random_linear_code(GF(13),30,9) # le nv a mit 17 min et C. 48
-
 C = codes.random_linear_code(GF(5),50,11) # le meilleur en tp est C.min < nv < ancien err car nv != C. et opti = C.
-#Mais qd j ai refait le test cela a donne un resultat egal pour tous  
-C = codes.random_linear_code(GF(7),50,7) # pareil pour celui donc ya proble avec le nv 
-C = codes.random_linear_code(GF(11),50,5) # pareil
-C = codes.random_linear_code(GF(17),35,6) #pareil
-C = codes.random_linear_code(GF(5),55,10) # pareil
 
-C = codes.random_linear_code(GF(5),44,5) # res diff de 1, une fois je repete le proc cest =
+C = codes.random_linear_code(GF(7),50,7) # Bon  
+C = codes.random_linear_code(GF(11),50,5) #  Bon 
+C = codes.random_linear_code(GF(17),35,6) # Bon
+C = codes.random_linear_code(GF(5),55,10) # Bon
+C = codes.random_linear_code(GF(5),55,9)  # Bon
 
-C = codes.random_linear_code(GF(2),100,11)
-C = codes.random_linear_code(GF(2),100,25)
+C = codes.random_linear_code(GF(5),44,5) # Bon
 
-C = codes.random_linear_code(GF(3),100,11) # C. < nv < opti < brou
+C = codes.random_linear_code(GF(2),100,11)  # Bon
+C = codes.random_linear_code(GF(2),100,25)  # Bon
+
+C = codes.random_linear_code(GF(3),100,11) # Bon
 C = codes.random_linear_code(GF(23),35,6) 
 
 

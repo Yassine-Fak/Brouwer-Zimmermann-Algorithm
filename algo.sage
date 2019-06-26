@@ -149,110 +149,6 @@ def minimum_distance_brouwer(C):
     lb = num_info_set
     w = 1
     Z = IntegerRing()
-
-    print("The number of disjoint information set is : {} ".format(num_info_set))
-
-    if F == GF(2) :
-      while w <= k and lb < ub :
-        for m in xrange(0,num_info_set) : # pour calculer G22 = L[m]
-
-          X = zero_vector(k)
-          for e in xrange(w):
-            X[e] = F.one()
-
-          A = L[m].row(0)
-          for i in xrange(1,w):
-            A += L[m].row(i)
-          ub = min(ub, A.hamming_weight())
-          if ub <= lb :
-            return ub
-
-          for i,j in combinations(k,w):
-            A += L[m].row(i) + L[m].row(j)
-            ub = min(ub, A.hamming_weight())
-            if ub <= lb :
-              return ub
-          lb += 1
-        w += 1
-      return ub
-
-    while w <= k and lb < ub :
-
-      for m in xrange(0,num_info_set) : # pour calculer G22 = L[m]
-
-        X = zero_vector(k)
-        for e in xrange(w):
-          X[e] = F.one()
-
-        A = L[m].row(0)
-        for i in xrange(1,w):
-          A += L[m].row(i)
-        ub = min(ub, A.hamming_weight())
-        if ub <= lb :
-          return ub
-
-        a = [0]*w
-        for i in xrange(1,(q-1)^w):
-          a_anc = copy(a)
-          a = Z(i).digits(q-1,padto=w) 
-          X = [g^(a[w-1-i]) for i in xrange(w)] + [F.zero()]*(k-w)
-          X = vector(X)
-
-          for i in (vector(a) - vector(a_anc)).support() :
-            A += (g^a[i] - g^a_anc[i])*L[m].row(w-1-i)
-          ub = min(ub, A.hamming_weight())
-          if ub <= lb :
-            return ub
-
-        for v in xrange(w) :
-          X[v] = F.one()
-
-        for i,j in combinations(k,w):
-
-          X[i] = F.zero(); X[j] = F.one()
-          S = X.support()
-          A = L[m].row(S[0])
-          for i in xrange(1-w,0) :
-            A += L[m].row(S[i])
-          ub = min(ub, A.hamming_weight())
-          if ub <= lb :
-            return ub
-          
-          for i in xrange(1,(q-1)^w):
-            a_anc = copy(a)
-            a = Z(i).digits(q-1,padto=w)
-            c = 1
-            for z in S :
-              X[z] = g^(a[w-c])
-              c += 1
-            
-            for j in (vector(a) - vector(a_anc)).support():
-              A += (g^a[j] - g^a_anc[j])*L[m].row(w-1-j)
-            ub = min(ub, A.hamming_weight())
-            if ub <= lb :
-              return ub
-
-          for v in S :
-            X[v] = F.one()
-
-        lb += 1
-      w += 1
-    return ub
-
-
-def minimum_distance_brouwer_opti(C):
-
-    G1 = C.generator_matrix()
-    n,k = C.length(), C.dimension()
-    F = C.base_field()
-    g = F.multiplicative_generator()
-    q = F.cardinality()
-    G2, num_info_set = infomation_set_brouwer(G1)
-    L = list_of_system_gen_mat(G2,num_info_set,k)
-    ub = n - k + 1
-    lb = num_info_set
-    w = 1
-    Z = IntegerRing()
     print("The number of disjoint information set is : {} ".format(num_info_set))
 
     if F == GF(2) :
@@ -338,10 +234,6 @@ def minimum_distance_brouwer_nouveau(C):
     if F == GF(2) :
       while w <= k and lb < ub :
         for m in xrange(0,num_info_set) : # pour calculer G22 = L[m]
-          X = zero_vector(k)
-          for e in xrange(w):
-            X[e] = F.one()
-
           A = L[m].row(0)
           for i in xrange(1,w):
             A += L[m].row(i)
@@ -360,10 +252,6 @@ def minimum_distance_brouwer_nouveau(C):
 
     while w <= k and lb < ub :
       for m in xrange(0,num_info_set) : # pour calculer G22 = L[m]
-        X = zero_vector(k)
-        for e in xrange(w):
-          X[e] = F.one()
-
         A = L[m].row(0)
         for i in xrange(1,w):
           A += L[m].row(i)
@@ -405,8 +293,7 @@ def minimum_distance_brouwer_nouveau(C):
     return ub
 
 
-# il faut tester cette fonction 
-def minimum_distance_brouwer_nouveau_opti(C):
+def minimum_distance_brouwer_nouveau_bis(C):
 
     G1 = C.generator_matrix()
     n,k = C.length(), C.dimension()
@@ -442,45 +329,39 @@ def minimum_distance_brouwer_nouveau_opti(C):
 
     while w <= k and lb < ub :
       for m in xrange(0,num_info_set) : # pour calculer G22 = L[m]
-        A = L[m].row(0)
-        for i in xrange(1,w):
-          A += L[m].row(i)
-        ub = min(ub, A.hamming_weight())
-        if ub <= lb :
-          return ub
-
-        A_anc = copy(A)
-        for i,j in combinations(k,w):
-          A += L[m].row(j) - L[m].row(i) 
-          ub = min(ub, A.hamming_weight()) 
-          if ub <= lb :
-            return ub
-
         a = [0]*w
-        A = copy(A_anc)
-        for i in xrange(1,(q-1)^w):
+        for i in xrange(0,(q-1)^w):
           a_anc = copy(a)
           a = Z(i).digits(q-1,padto=w) 
           X = [g^(a[w-1-i]) for i in xrange(w)] + [F.zero()]*(k-w)
           X = vector(X) 
-          for i in (vector(a) - vector(a_anc)).support() :
-            A += (g^a[i] - g^a_anc[i])*L[m].row(w-1-i)
+          print X
+          if i == 0:
+            A = L[m].row(0)
+            for j in xrange(1,w):
+              A += L[m].row(j)   
+          
+          for k in (vector(a) - vector(a_anc)).support() :
+            A += (g^a[k] - g^a_anc[k])*L[m].row(w-1-k)
           
           ub = min(ub, A.hamming_weight())
           if ub <= lb :
             return ub
 
-          A_anc = copy(A) 
+          B = copy(A) 
           for i,j in combinations(k,w):
             X[j]=X[i] ; X[i]=F.zero()
-            A += X[j]*(L[m].row(j) - L[m].row(i))
-            ub = min(ub, A.hamming_weight())
-            if ub <= lb :
+            B += X[j]*(L[m].row(j) - L[m].row(i))
+            ub = min(ub, B.hamming_weight())
+            if ub <= lb:
               return ub
-          A = copy(A_anc)
         lb += 1
       w += 1
     return ub
+
+
+
+
 
 
 

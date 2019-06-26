@@ -361,7 +361,7 @@ def minimum_distance_brouwer_nouveau_bis(C):
 C = codes.random_linear_code(GF(7),40,5) 
 C = codes.random_linear_code(GF(17),15,4)
 
-C = codes.random_linear_code(GF(13),30,9) # le nv a mit 17 min et C. 48
+C = codes.random_linear_code(GF(13),30,9) # le nv a mit 17 min <<< C. ~ 48
 C = codes.random_linear_code(GF(5),50,11) # le meilleur en tp est C.min < nv < ancien err car nv != C. et opti = C.
 
 C = codes.random_linear_code(GF(7),50,7)
@@ -381,6 +381,8 @@ C = codes.random_linear_code(GF(23),35,6)
 
 # http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/permutation.html?highlight=permutation#module-sage.combinat.permutation
 # https://www.diveinto.org/python3/advanced-iterators.html
+# https://git.sagemath.org/sage.git/tree/src/sage/combinat/gray_codes.py?id=3b92a85394e8fc6f7572c58d0a6ce8b1bebacce2
+# Volume 4 Fascicle 2, Generating All Tuples and Permutations (2005), v+128pp. ISBN 0-201-85393-0
 
 
 

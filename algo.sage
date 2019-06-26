@@ -280,14 +280,13 @@ def minimum_distance_brouwer_nouveau(C):
           if ub <= lb :
             return ub
 
-          A_anc = copy(A) 
+          A_int = copy(A) 
           for i,j in combinations(k,w):
             X[j]=X[i] ; X[i]=F.zero()
-            A += X[j]*(L[m].row(j) - L[m].row(i))
-            ub = min(ub, A.hamming_weight())
+            A_int += X[j]*(L[m].row(j) - L[m].row(i))
+            ub = min(ub, A_int.hamming_weight())
             if ub <= lb :
               return ub
-          A = copy(A_anc)
         lb += 1
       w += 1
     return ub
@@ -329,31 +328,29 @@ def minimum_distance_brouwer_nouveau_bis(C):
 
     while w <= k and lb < ub :
       for m in xrange(0,num_info_set) : # pour calculer G22 = L[m]
+        A = L[m].row(0)
+        for i in xrange(1,w):
+          A += L[m].row(i)
         a = [0]*w
-        for i in xrange(0,(q-1)^w):
+        for v in xrange(0,(q-1)^w):
           a_anc = copy(a)
-          a = Z(i).digits(q-1,padto=w) 
+          a = Z(v).digits(q-1,padto=w) 
           X = [g^(a[w-1-i]) for i in xrange(w)] + [F.zero()]*(k-w)
           X = vector(X) 
-          print X
-          if i == 0:
-            A = L[m].row(0)
-            for j in xrange(1,w):
-              A += L[m].row(j)   
-          
-          for k in (vector(a) - vector(a_anc)).support() :
-            A += (g^a[k] - g^a_anc[k])*L[m].row(w-1-k)
+
+          for i in (vector(a) - vector(a_anc)).support() :
+            A += (g^a[i] - g^a_anc[i])*L[m].row(w-1-i)
           
           ub = min(ub, A.hamming_weight())
           if ub <= lb :
             return ub
 
-          B = copy(A) 
+          A_int = copy(A) 
           for i,j in combinations(k,w):
             X[j]=X[i] ; X[i]=F.zero()
-            B += X[j]*(L[m].row(j) - L[m].row(i))
-            ub = min(ub, B.hamming_weight())
-            if ub <= lb:
+            A_int += X[j]*(L[m].row(j) - L[m].row(i))
+            ub = min(ub, A_int.hamming_weight())
+            if ub <= lb :
               return ub
         lb += 1
       w += 1
@@ -361,28 +358,24 @@ def minimum_distance_brouwer_nouveau_bis(C):
 
 
 
-
-
-
-
-C = codes.random_linear_code(GF(7),40,5) # bon bon
-C = codes.random_linear_code(GF(17),15,4) # bon bon
+C = codes.random_linear_code(GF(7),40,5) 
+C = codes.random_linear_code(GF(17),15,4)
 
 C = codes.random_linear_code(GF(13),30,9) # le nv a mit 17 min et C. 48
 C = codes.random_linear_code(GF(5),50,11) # le meilleur en tp est C.min < nv < ancien err car nv != C. et opti = C.
 
-C = codes.random_linear_code(GF(7),50,7) # Bon bon
-C = codes.random_linear_code(GF(11),50,5) #  Bon bon
-C = codes.random_linear_code(GF(17),35,6) # Bon bon
-C = codes.random_linear_code(GF(5),55,10) # Bon bon
-C = codes.random_linear_code(GF(5),55,9)  # Bon Bon
+C = codes.random_linear_code(GF(7),50,7)
+C = codes.random_linear_code(GF(11),50,5)
+C = codes.random_linear_code(GF(17),35,6)
+C = codes.random_linear_code(GF(5),55,10)
+C = codes.random_linear_code(GF(5),55,9) 
 
-C = codes.random_linear_code(GF(5),44,5) # Bon Bon
+C = codes.random_linear_code(GF(5),44,5) 
 
-C = codes.random_linear_code(GF(2),100,11)  # Bon bon
-C = codes.random_linear_code(GF(2),100,25)  # Bon bon
+C = codes.random_linear_code(GF(2),100,11)  
+C = codes.random_linear_code(GF(2),100,25)  
 
-C = codes.random_linear_code(GF(3),100,11) # Bon bon
+C = codes.random_linear_code(GF(3),100,11) 
 C = codes.random_linear_code(GF(23),35,6) 
 
 

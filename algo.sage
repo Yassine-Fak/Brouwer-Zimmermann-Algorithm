@@ -117,25 +117,6 @@ def list_of_system_gen_mat(M,m,k):
 
     return L
 
-def incr_vector(X,F):
-  V = copy(X)
-  V = vector(V)
-  s = V.support()
-  g = F.multiplicative_generator()
-  q = F.cardinality()
-
-  if V[s[len(s)-1]] != g^(q-2) :
-    L = [t for t in xrange(q) if g^t == V[s[len(s)-1]] ]
-    V[s[len(s)-1]] = g^(L[0]+1)
-  else :
-    V[s[len(s)-1]] = g^0
-    V_inter = [V[i] for i in xrange(s[len(s)-1])]
-    V_inter = vector(V_inter)
-    V_inter = incr_vector(V_inter,F)
-    V = list(V_inter) + [V[i] for i in xrange(s[len(s)-1],len(V))]
-    V = vector(V)
-  return V
-
 def minimum_distance_brouwer(C):
 
     G1 = C.generator_matrix()

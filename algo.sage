@@ -126,6 +126,7 @@ def minimum_distance_brouwer(C):
     q = F.cardinality()
     G2, num_info_set = infomation_set_brouwer(G1)
     L = list_of_system_gen_mat(G2,num_info_set,k)
+    M = [g^i for i in xrange(q-1)]
     ub = n - k + 1
     lb = num_info_set
     w = 1
@@ -152,23 +153,22 @@ def minimum_distance_brouwer(C):
       return ub
 
     while w <= k and lb < ub :
-      for m in xrange(0,num_info_set) : # pour calculer G22 = L[m]
+      for m in xrange(num_info_set) : # pour calculer G22 = L[m]
         A = L[m].row(0)
         for i in xrange(1,w):
           A += L[m].row(i)
         a = [0]*w
-        for v in xrange(0,(q-1)^w):
+        for v in xrange((q-1)^w):
           a_anc = copy(a)
           a = Z(v).digits(q-1,padto=w) 
-          X = [g^(a[w-1-i]) for i in xrange(w)] + [F.zero()]*(k-w)
-          X = vector(X) 
+          X = [M[a[w-1-i]] for i in xrange(w)] + [F.zero()]*(k-w)
           a_supp = []
           for i in xrange(w):
             if a[i] != a_anc[i]:
               a_supp += [i]
-
+          
           for i in a_supp :
-            A += (g^a[i] - g^a_anc[i])*L[m].row(w-1-i)
+            A += (M[a[i]] - M[a_anc[i]])*L[m].row(w-1-i)
 
           ub = min(ub, A.hamming_weight())
           if ub <= lb :
@@ -187,6 +187,8 @@ def minimum_distance_brouwer(C):
     return ub
 
 
+
+
 C = codes.random_linear_code(GF(7),40,5) 
 C = codes.random_linear_code(GF(17),15,4)
 
@@ -195,7 +197,7 @@ C = codes.random_linear_code(GF(5),50,11) # le meilleur en tp est C.min < nv < a
 
 C = codes.random_linear_code(GF(7),50,7)
 C = codes.random_linear_code(GF(11),50,5)
-C = codes.random_linear_code(GF(17),35,6)
+C = codes.random_linear_code(GF(17),35,6) #met du temps
 C = codes.random_linear_code(GF(5),55,10)
 C = codes.random_linear_code(GF(5),55,9) 
 
@@ -205,14 +207,10 @@ C = codes.random_linear_code(GF(2),100,11)
 C = codes.random_linear_code(GF(2),100,25)  
 
 C = codes.random_linear_code(GF(3),100,11) 
-C = codes.random_linear_code(GF(23),35,6) 
+C = codes.random_linear_code(GF(23),35,6) #met du temps 
 
 
 # http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/permutation.html?highlight=permutation#module-sage.combinat.permutation
 # https://www.diveinto.org/python3/advanced-iterators.html
 # https://git.sagemath.org/sage.git/tree/src/sage/combinat/gray_codes.py?id=3b92a85394e8fc6f7572c58d0a6ce8b1bebacce2
 # Volume 4 Fascicle 2, Generating All Tuples and Permutations (2005), v+128pp. ISBN 0-201-85393-0
-# Ici je vais faire ca pour tous les Xi
-# Et on aura A == L (apres avoir les mettre sous forme de sort)
-# La conclusion est qu'on aura TOUS les mots !!!!!!! comme si on fait Arrangements(X,6).list() 
-

@@ -117,8 +117,7 @@ def list_of_system_gen_mat(M,m,k):
 
     return L
 
-
-def minimum_distance_brouwer_nouveau_bis(C):
+def minimum_distance_brouwer(C):
 
     G1 = C.generator_matrix()
     n,k = C.length(), C.dimension()
@@ -163,17 +162,22 @@ def minimum_distance_brouwer_nouveau_bis(C):
           a = Z(v).digits(q-1,padto=w) 
           X = [g^(a[w-1-i]) for i in xrange(w)] + [F.zero()]*(k-w)
           X = vector(X) 
+          a_supp = []
+          for i in xrange(w):
+            if a[i] != a_anc[i]:
+              a_supp += [i]
 
-          for i in (vector(a) - vector(a_anc)).support() :
+          for i in a_supp :
             A += (g^a[i] - g^a_anc[i])*L[m].row(w-1-i)
-          
+
           ub = min(ub, A.hamming_weight())
           if ub <= lb :
             return ub
-
+          
           A_int = copy(A) 
           for i,j in combinations(k,w):
-            X[j]=X[i] ; X[i]=F.zero()
+            X[j] = X[i]
+            X[i] = F.zero()
             A_int += X[j]*(L[m].row(j) - L[m].row(i))
             ub = min(ub, A_int.hamming_weight())
             if ub <= lb :
@@ -183,11 +187,10 @@ def minimum_distance_brouwer_nouveau_bis(C):
     return ub
 
 
-
 C = codes.random_linear_code(GF(7),40,5) 
 C = codes.random_linear_code(GF(17),15,4)
 
-C = codes.random_linear_code(GF(13),30,9) # le nv a mit 17 min <<< C. ~ 48
+C = codes.random_linear_code(GF(13),30,9) 
 C = codes.random_linear_code(GF(5),50,11) # le meilleur en tp est C.min < nv < ancien err car nv != C. et opti = C.
 
 C = codes.random_linear_code(GF(7),50,7)
@@ -209,29 +212,7 @@ C = codes.random_linear_code(GF(23),35,6)
 # https://www.diveinto.org/python3/advanced-iterators.html
 # https://git.sagemath.org/sage.git/tree/src/sage/combinat/gray_codes.py?id=3b92a85394e8fc6f7572c58d0a6ce8b1bebacce2
 # Volume 4 Fascicle 2, Generating All Tuples and Permutations (2005), v+128pp. ISBN 0-201-85393-0
-
-
-
-X1 = [1,2,3,0,0,0]
-X2 = [1,3,2,0,0,0]
-X3 = [2,1,3,0,0,0]
-X4 = [2,3,1,0,0,0]
-X5 = [3,1,2,0,0,0]
-X6 = [3,2,1,0,0,0]
-L = [X1] + [X2] + [X3] + [X4] + [X5] + [X6] 
-for i,j in combinations(6,3):
-  X1[j]=X1[i] ; X1[i]=0
-  X = copy(X6)
-  L = L + [X]
-
-X = [1,2,3,0,0,0]
-A = Arrangements(X,6).list()
 # Ici je vais faire ca pour tous les Xi
 # Et on aura A == L (apres avoir les mettre sous forme de sort)
 # La conclusion est qu'on aura TOUS les mots !!!!!!! comme si on fait Arrangements(X,6).list() 
-
-
-X = [1,2,3,0,0,0]
-P = sage.combinat.permutation.Permutations_mset(X)
-P.list()
 

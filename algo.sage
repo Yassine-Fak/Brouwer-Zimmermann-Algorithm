@@ -1,4 +1,6 @@
 from sage.combinat.gray_codes import combinations
+import time 
+
 
 def systematique_form(G):
     M = copy(G)
@@ -8,6 +10,7 @@ def systematique_form(G):
     c = Permutation(c)
     M.permute_columns(c)
     return M.echelon_form()
+
 
 def infomation_set(G):
 
@@ -117,6 +120,7 @@ def list_of_system_gen_mat(M,m,k):
 
     return L
 
+
 def minimum_distance_brouwer(C):
 
     G1 = C.generator_matrix()
@@ -187,30 +191,22 @@ def minimum_distance_brouwer(C):
     return ub
 
 
+def test():
+  # (GF(),long,dim)
+  L = [(2,100,11),(3,100,11),(5,44,5),(2,100,25),(7,40,5),(17,15,4),(7,50,7),(11,50,5),(5,55,10),(5,55,9)]
+  print ("-------------------")
+  for x in L :
+    C = codes.random_linear_code(GF(x[0]),x[1],x[2])
+    print("For {} we have : ".format(C))
+    print (" ")
+    print("C.minimum_distance() : ")
+    a = %time C.minimum_distance()
+    print a
+    print (" ")
+    print("minimum_distance_brouwer(C) :")
+    b = %time minimum_distance_brouwer(C)
+    print b
+    print ("-------------------")
 
-
-C = codes.random_linear_code(GF(7),40,5) 
-C = codes.random_linear_code(GF(17),15,4)
 
 C = codes.random_linear_code(GF(13),30,9) 
-C = codes.random_linear_code(GF(5),50,11) # le meilleur en tp est C.min < nv < ancien err car nv != C. et opti = C.
-
-C = codes.random_linear_code(GF(7),50,7)
-C = codes.random_linear_code(GF(11),50,5)
-C = codes.random_linear_code(GF(17),35,6) #met du temps
-C = codes.random_linear_code(GF(5),55,10)
-C = codes.random_linear_code(GF(5),55,9) 
-
-C = codes.random_linear_code(GF(5),44,5) 
-
-C = codes.random_linear_code(GF(2),100,11)  
-C = codes.random_linear_code(GF(2),100,25)  
-
-C = codes.random_linear_code(GF(3),100,11) 
-C = codes.random_linear_code(GF(23),35,6) #met du temps 
-
-
-# http://doc.sagemath.org/html/en/reference/combinat/sage/combinat/permutation.html?highlight=permutation#module-sage.combinat.permutation
-# https://www.diveinto.org/python3/advanced-iterators.html
-# https://git.sagemath.org/sage.git/tree/src/sage/combinat/gray_codes.py?id=3b92a85394e8fc6f7572c58d0a6ce8b1bebacce2
-# Volume 4 Fascicle 2, Generating All Tuples and Permutations (2005), v+128pp. ISBN 0-201-85393-0

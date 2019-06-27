@@ -187,6 +187,95 @@ def minimum_distance_brouwer(C):
     return ub
 
 
+def minimum_distance_brouwer_bis(C):
+
+    G1 = C.generator_matrix()
+    n,k = C.length(), C.dimension()
+    F = C.base_field()
+    g = F.multiplicative_generator()
+    q = F.cardinality()
+    G2, num_info_set = infomation_set_brouwer(G1)
+    L = list_of_system_gen_mat(G2,num_info_set,k)
+    ub = n - k + 1
+    lb = num_info_set
+    w = 1
+    Z = IntegerRing()
+    print("The number of disjoint information set is : {} ".format(num_info_set))
+    
+    if F == GF(2) :
+      while w <= k and lb < ub :
+        for m in xrange(0,num_info_set) : # pour calculer G22 = L[m]
+          A = L[m].row(0)
+          for i in xrange(1,w):
+            A += L[m].row(i)
+          ub_int = 0
+          for i in xrange(n) :
+            if A[i] != F.zero() :
+              ub_int += 1
+          ub = min(ub, ub_int)
+          if ub <= lb :
+            return ub
+
+          for i,j in combinations(k,w):
+            A += L[m].row(i) + L[m].row(j)
+            ub_int = 0
+            for i in xrange(n) :
+              if A[i] != F.zero() :
+                ub_int += 1
+            ub = min(ub, ub_int)
+            if ub <= lb :
+              return ub
+          lb += 1
+        w += 1
+      return ub
+
+    while w <= k and lb < ub :
+      for m in xrange(0,num_info_set) : # pour calculer G22 = L[m]
+        A = L[m].row(0)
+        for i in xrange(1,w):
+          A += L[m].row(i)
+        a = [0]*w
+        for v in xrange(0,(q-1)^w):
+          a_anc = copy(a)
+          a = Z(v).digits(q-1,padto=w) 
+          X = [g^(a[w-1-i]) for i in xrange(w)] + [F.zero()]*(k-w)
+          X = vector(X) 
+          a_supp = []
+          for i in xrange(w):
+            if a[i] != a_anc[i]:
+              a_supp += [i]
+
+          for i in a_supp :
+            A += (g^a[i] - g^a_anc[i])*L[m].row(w-1-i)
+          
+          ub_int = 0
+          for i in xrange(n) :
+            if A[i] != F.zero() :
+              ub_int += 1
+          ub = min(ub, ub_int)
+          if ub <= lb :
+            return ub
+          
+          A_int = copy(A) 
+          for i,j in combinations(k,w):
+            X[j] = X[i]
+            X[i] = F.zero()
+            A_int += X[j]*(L[m].row(j) - L[m].row(i))
+            ub_int = 0
+            for i in xrange(n) :
+              if A_int[i] != F.zero() :
+                ub_int += 1
+            ub = min(ub, ub_int)
+            if ub <= lb :
+              return ub
+        lb += 1
+      w += 1
+    return ub
+
+
+# l'ancien c'est mieux 
+# le bis il faut le laisser tomber
+
 C = codes.random_linear_code(GF(7),40,5) 
 C = codes.random_linear_code(GF(17),15,4)
 

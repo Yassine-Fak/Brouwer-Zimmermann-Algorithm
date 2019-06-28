@@ -126,15 +126,11 @@ def minimum_distance_brouwer(C):
     G1 = C.generator_matrix()
     n,k = C.length(), C.dimension()
     F = C.base_field()
-    g = F.multiplicative_generator()
-    q = F.cardinality()
     G2, num_info_set = infomation_set_brouwer(G1)
     L = list_of_system_gen_mat(G2,num_info_set,k)
-    M = [g^i for i in xrange(q-1)]
     ub = n - k + 1
     lb = num_info_set
     w = 1
-    Z = IntegerRing()
     print("The number of disjoint information set is : {} ".format(num_info_set))
     
     if F == GF(2) :
@@ -155,8 +151,14 @@ def minimum_distance_brouwer(C):
           lb += 1
         w += 1
       return ub
+    
+    q = F.cardinality()
+    g = F.multiplicative_generator()
+    M = [g^i for i in xrange(q-1)]
+    Z = IntegerRing()
 
     while w <= k and lb < ub :
+      X = [F.zero()]*k
       for m in xrange(num_info_set) : # pour calculer G22 = L[m]
         A = L[m].row(0)
         for i in xrange(1,w):
@@ -164,8 +166,9 @@ def minimum_distance_brouwer(C):
         a = [0]*w
         for v in xrange((q-1)^w):
           a_anc = copy(a)
-          a = Z(v).digits(q-1,padto=w) 
-          X = [M[a[w-1-i]] for i in xrange(w)] + [F.zero()]*(k-w)
+          a = Z(v).digits(q-1,padto=w)
+          for i in xrange(w):
+            X[i] = M[a[w-1-i]]  
           a_supp = []
           for i in xrange(w):
             if a[i] != a_anc[i]:
@@ -191,9 +194,26 @@ def minimum_distance_brouwer(C):
     return ub
 
 
-def test():
+def test_rapide(): # moins de deux min.
   # (GF(),long,dim)
-  L = [(2,100,11),(3,100,11),(5,44,5),(2,100,25),(7,40,5),(17,15,4),(7,50,7),(11,50,5),(5,55,10),(5,55,9)]
+  L = [(2,77,15),(2,100,11),(3,100,11),(9,50,8),(7^2,35,6),(5,44,5),(25,28,5),(2,100,25),(7,40,5),(17,15,4),(7,50,7),(11,50,5),(5,55,10),(5,55,9)]
+  print ("-------------------")
+  for x in L :
+    C = codes.random_linear_code(GF(x[0]),x[1],x[2])
+    print("For {} we have : ".format(C))
+    print (" ")
+    print("C.minimum_distance() : ")
+    a = %time C.minimum_distance()
+    print a
+    print (" ")
+    print("minimum_distance_brouwer(C) :")
+    b = %time minimum_distance_brouwer(C)
+    print b
+    print ("-------------------")
+
+def test_lent():
+  # (GF(),long,dim)
+  L = [(7^2,35,6),(5,44,5),(25,28,5),(2,100,25),(7,40,5),(17,15,4),(7,50,7),(11,50,5),(5,55,10),(5,55,9)]
   print ("-------------------")
   for x in L :
     C = codes.random_linear_code(GF(x[0]),x[1],x[2])
@@ -209,4 +229,4 @@ def test():
     print ("-------------------")
 
 
-C = codes.random_linear_code(GF(13),30,9) 
+

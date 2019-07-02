@@ -128,6 +128,9 @@ def minimum_distance_brouwer(C,maxiter=3):
     n,k = C.length(), C.dimension()
     F = C.base_field()
     G2, num_info_set = infomation_set_brouwer(G1,maxiter)
+    # J'ai ajoute cette instruction 
+    if (n - k*num_info_set) >= k :
+      G2, num_info_set = infomation_set_brouwer(G1,2*maxiter)
     L = list_of_system_gen_mat(G2,num_info_set,k)
     ub = n - k + 1
     lb = num_info_set
@@ -214,6 +217,10 @@ def test_rapide(): # moins de deux min.
     print("minimum_distance_zimmermann(C) :")
     c = %time minimum_distance_zimmermann(C)
     print c
+    print (" ")
+    print("minimum_distance_zimmermann_bis(C) :")
+    d = %time minimum_distance_zimmermann_bis(C)
+    print d
     print ("-------------------")
 
 
@@ -236,6 +243,10 @@ def test_rapide_gf2(): # moins de deux min.
     print("minimum_distance_zimmermann(C) :")
     c = %time minimum_distance_zimmermann(C)
     print c
+    print (" ")
+    print("minimum_distance_zimmermann_bis(C) :")
+    d = %time minimum_distance_zimmermann_bis(C)
+    print d
     print ("-------------------")
 
 
@@ -258,8 +269,11 @@ def test_lent():
     print("minimum_distance_zimmermann(C) :")
     c = %time minimum_distance_zimmermann(C)
     print c
+    print (" ")
+    print("minimum_distance_zimmermann_nv(C) :")
+    d = %time minimum_distance_zimmermann_nv(C)
+    print d
     print ("-------------------")
-
 
 def minimum_distance_zimmermann(C,maxiter=3):
 
@@ -267,52 +281,45 @@ def minimum_distance_zimmermann(C,maxiter=3):
     n,k = C.length(), C.dimension()
     F = C.base_field()
     G2, num_info_set = infomation_set_brouwer_zimmer(G1,maxiter)
-    R = G2.matrix_from_columns(range(num_info_set*k,n))
 
-    if R.rank() == 0 :
-      print "Brouwer 1 ! "
-      return minimum_distance_brouwer(C,maxiter)
-     
     if (n - k*num_info_set) >= k :
       G2, num_info_set = infomation_set_brouwer_zimmer(G1,2*maxiter)
-      R = G2.matrix_from_columns(range(num_info_set*k,n))
-      if R.rank() == 0 :
-        print "Brouwer 2 ! "
-        return minimum_distance_brouwer(C,2*maxiter)
-      print("The number of disjoint information set is : {} ".format(num_info_set))
-    else :
-      print("The number of disjoint information set is : {} ".format(num_info_set))
     
+    R = G2.matrix_from_columns(range(num_info_set*k,n))
     R_pivot = R.pivots()
     r = len(R_pivot)
-    b = range(0,num_info_set*k) + [num_info_set*k + i for i in R_pivot]
-    c = copy(b)
-    for i in range(n):
-      if i in b:
-        pass
-      else:
-        c += [i]
-    d = [i + 1 for i in c]
-    d = Permutation(d)
-    G2.permute_columns(d)
-    # A est le nv information set 
-    A = G2.matrix_from_columns(range(num_info_set*k,num_info_set*k+r))
-    c = 0
-    I = range(num_info_set*k,num_info_set*k+r)
-    while A.rank() != k:
-      if A.rank() < G2.matrix_from_columns(I + [c]).rank():
-        A = G2.matrix_from_columns(I + [c])
-        I += [c]
-      c += 1
-      if c == k :
-        break        
 
-    L = list_of_system_gen_mat(G2,num_info_set,k) + [A.inverse()*G2]
-    num_info_set += 1
+    if r != 0:
+      b = range(num_info_set*k) + [num_info_set*k + i for i in R_pivot]
+      c = copy(b)
+      for i in range(n):
+        if i in b:
+          pass
+        else:
+          c += [i]
+      d = [i + 1 for i in c]
+      d = Permutation(d)
+      G2.permute_columns(d)
+      I = range(num_info_set*k,num_info_set*k+r)
+      A = G2.matrix_from_columns(I)
+      c = 0
+      while A.rank() != k:
+        if A.rank() < G2.matrix_from_columns(I + [c]).rank():
+          A = G2.matrix_from_columns(I + [c])
+          I += [c]
+        c += 1
+        if c == k :
+          break    
+      L = list_of_system_gen_mat(G2,num_info_set,k) + [A.inverse()*G2]
+      num_info_set += 1
+
+    else :
+      L = list_of_system_gen_mat(G2,num_info_set,k)
+
+    print("The number of disjoint information set is : {} ".format(num_info_set))
     lb = 1
     ub = n - k + 1
     w = 1
-    rel_ran = [k]*(num_info_set - 1) + [r] # The sequence of relative ranks
 
     if F == GF(2) :
       while w <= k and lb < ub :
@@ -329,10 +336,9 @@ def minimum_distance_zimmermann(C,maxiter=3):
             ub = min(ub, A.hamming_weight())
             if ub <= lb :
               return ub
-        sum = max(0,w+1-k+rel_ran[0])
-        for i in xrange(1,num_info_set):
-          sum += max(0,w+1-k+rel_ran[i])
-        lb = sum
+        lb = max(0,w+1-k+r)
+        for i in xrange(num_info_set-1):
+          lb += (w+1)
         w += 1
       return ub
     
@@ -372,12 +378,116 @@ def minimum_distance_zimmermann(C,maxiter=3):
             ub = min(ub, A_int.hamming_weight())
             if ub <= lb :
               return ub
-      sum = max(0,w+1-k+rel_ran[0])
-      for i in xrange(1,num_info_set):
-        sum += max(0,w+1-k+rel_ran[i])
-      lb = sum
+      lb = max(0,w+1-k+r)
+      for i in xrange(num_info_set-1):
+        lb += (w+1)
       w += 1
     return ub
 
 
+
+def minimum_distance_zimmermann_nv(C,maxiter=3):
+
+    G1 = C.generator_matrix()
+    n,k = C.length(), C.dimension()
+    F = C.base_field()
+    G2, num_info_set = infomation_set_brouwer_zimmer(G1,maxiter)
+
+    if (n - k*num_info_set) >= k :
+      G2, num_info_set = infomation_set_brouwer_zimmer(G1,2*maxiter)
+    
+    R = G2.matrix_from_columns(range(num_info_set*k,n))
+    R_pivot = R.pivots()
+    r = len(R_pivot)
+
+    if r != 0:
+      b = range(num_info_set*k) + [num_info_set*k + i for i in R_pivot]
+      c = copy(b)
+      for i in range(n):
+        if i in b:
+          pass
+        else:
+          c += [i]
+      d = [i + 1 for i in c]
+      d = Permutation(d)
+      G2.permute_columns(d)
+      I = range(num_info_set*k,num_info_set*k+r)
+      A = G2.matrix_from_columns(I)
+      c = 0
+      while A.rank() != k:
+        if A.rank() < G2.matrix_from_columns(I + [c]).rank():
+          A = G2.matrix_from_columns(I + [c])
+          I += [c]
+        c += 1
+        if c == k :
+          break    
+      L = list_of_system_gen_mat(G2,num_info_set,k) + [A.inverse()*G2]
+      num_info_set += 1
+
+    else :
+      L = list_of_system_gen_mat(G2,num_info_set,k)
+
+    print("The number of disjoint information set is : {} ".format(num_info_set))
+    lb = num_info_set
+    ub = n - k + 1
+    w = 1
+
+    if F == GF(2) :
+      while w <= k and lb < ub :
+        for m in xrange(num_info_set) : # pour calculer G22 = L[m]
+          A = L[m].row(0)
+          for i in xrange(1,w):
+            A += L[m].row(i)
+          ub = min(ub, A.hamming_weight())
+          if ub <= lb :
+            return ub
+
+          for i,j in combinations(k,w):
+            A += L[m].row(i) + L[m].row(j)
+            ub = min(ub, A.hamming_weight())
+            if ub <= lb :
+              return ub
+          lb += 1
+        w += 1
+      return ub
+    
+    q = F.cardinality()
+    g = F.multiplicative_generator()
+    M = [g^i for i in xrange(q-1)]
+    Z = IntegerRing()
+       
+    while w <= k and lb < ub :
+      X = [F.zero()]*k
+      for m in xrange(num_info_set) : # pour calculer G22 = L[m]
+        A = L[m].row(0)
+        for i in xrange(1,w):
+          A += L[m].row(i)
+        a = [0]*w
+        for v in xrange((q-1)^w):
+          a_anc = copy(a)
+          a = Z(v).digits(q-1,padto=w)
+          for i in xrange(w):
+            X[i] = M[a[w-1-i]]  
+          a_supp = []
+          for i in xrange(w):
+            if a[i] != a_anc[i]:
+              a_supp += [i]
+          for i in a_supp :
+            A += (M[a[i]] - M[a_anc[i]])*L[m].row(w-1-i)
+
+          ub = min(ub, A.hamming_weight())
+          if ub <= lb :
+            return ub
+          
+          A_int = copy(A) 
+          for i,j in combinations(k,w):
+            X[j] = X[i]
+            X[i] = F.zero()
+            A_int += X[j]*(L[m].row(j) - L[m].row(i))
+            ub = min(ub, A_int.hamming_weight())
+            if ub <= lb :
+              return ub
+        lb += 1
+      w += 1
+    return ub
 

@@ -231,6 +231,10 @@ def test_lent():
     print("minimum_distance_brouwer(C) :")
     b = %time minimum_distance_brouwer(C)
     print b
+    print (" ")
+    print("minimum_distance_zimmermann(C) :")
+    c = %time minimum_distance_zimmermann(C)
+    print c
     print ("-------------------")
 
 
@@ -247,34 +251,41 @@ def minimum_distance_zimmermann(C,maxiter=3):
     Z = IntegerRing()
 
     if R.rank() == 0 :
-      print "Brouwer1 ! "
+      print "Brouwer 1 ! "
       return minimum_distance_brouwer(C,maxiter)
-
-    if n - k*num_info_set >= k :
-      G2, num_info_set = infomation_set_brouwer_zimmer(G1,10)
+     
+    if (n - k*num_info_set) >= k :
+      G2, num_info_set = infomation_set_brouwer_zimmer(G1,2*maxiter)
       R = G2.matrix_from_columns(range(num_info_set*k,n))
       if R.rank() == 0 :
-        print "Brouwer2 ! "
-        return minimum_distance_brouwer(C,10)
+        print "Brouwer 2 ! "
+        return minimum_distance_brouwer(C,2*maxiter)
       print("The number of disjoint information set is : {} ".format(num_info_set))
     else :
       print("The number of disjoint information set is : {} ".format(num_info_set))
-
-    R = G2.matrix_from_columns(range(num_info_set*k,n))
+    
     R_pivot = R.pivots()
     r = len(R_pivot)
     b = range(0,num_info_set*k) + [num_info_set*k + i for i in R_pivot]
     c = copy(b)
+    print G2
+    print " " 
     for i in range(n):
       if i in b:
         pass
       else:
-        c = c + [i]
+        c += [i]
     d = [i + 1 for i in c]
     d = Permutation(d)
     G2.permute_columns(d)
-
+    print G2
+    print " "
+    
+    # A est le nv information set 
     A = G2.matrix_from_columns(range(num_info_set*k,num_info_set*k+r))
+    print A.rank()
+    print A
+    print " "
     c = 0
     I = range(num_info_set*k,num_info_set*k+r)
     while A.rank() != k:
@@ -284,6 +295,10 @@ def minimum_distance_zimmermann(C,maxiter=3):
       c += 1
       if c == k :
         break
+    
+    print A.rank()
+    print A
+    # TT est bon !! 
     
     L = list_of_system_gen_mat(G2,num_info_set,k) + [A.inverse()*G2]
     num_info_set += 1
@@ -347,4 +362,6 @@ def minimum_distance_zimmermann(C,maxiter=3):
         lb += max(0,(w+1)-(k-x))
       w += 1
     return ub
+
+
 

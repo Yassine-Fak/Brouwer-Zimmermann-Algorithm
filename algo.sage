@@ -268,8 +268,6 @@ def minimum_distance_zimmermann(C,maxiter=3):
     r = len(R_pivot)
     b = range(0,num_info_set*k) + [num_info_set*k + i for i in R_pivot]
     c = copy(b)
-    print G2
-    print " " 
     for i in range(n):
       if i in b:
         pass
@@ -278,14 +276,8 @@ def minimum_distance_zimmermann(C,maxiter=3):
     d = [i + 1 for i in c]
     d = Permutation(d)
     G2.permute_columns(d)
-    print G2
-    print " "
-    
     # A est le nv information set 
     A = G2.matrix_from_columns(range(num_info_set*k,num_info_set*k+r))
-    print A.rank()
-    print A
-    print " "
     c = 0
     I = range(num_info_set*k,num_info_set*k+r)
     while A.rank() != k:
@@ -294,12 +286,8 @@ def minimum_distance_zimmermann(C,maxiter=3):
         I += [c]
       c += 1
       if c == k :
-        break
-    
-    print A.rank()
-    print A
-    # TT est bon !! 
-    
+        break        
+
     L = list_of_system_gen_mat(G2,num_info_set,k) + [A.inverse()*G2]
     num_info_set += 1
     lb = 1
@@ -309,7 +297,7 @@ def minimum_distance_zimmermann(C,maxiter=3):
 
     if F == GF(2) :
       while w <= k and lb < ub :
-        for m in xrange(0,num_info_set) : # pour calculer G22 = L[m]
+        for m in xrange(num_info_set) : # pour calculer G22 = L[m]
           A = L[m].row(0)
           for i in xrange(1,w):
             A += L[m].row(i)
@@ -322,11 +310,11 @@ def minimum_distance_zimmermann(C,maxiter=3):
             ub = min(ub, A.hamming_weight())
             if ub <= lb :
               return ub
-        for x in rel_ran:
-          lb += max(0,(w+1)-(k-x))
+        for i in xrange(len(rel_ran)):
+          lb += max(0,w+1-k+rel_ran[i])
         w += 1
       return ub
-
+      
     while w <= k and lb < ub :
       X = [F.zero()]*k
       for m in xrange(num_info_set) : # pour calculer G22 = L[m]
@@ -358,10 +346,30 @@ def minimum_distance_zimmermann(C,maxiter=3):
             ub = min(ub, A_int.hamming_weight())
             if ub <= lb :
               return ub
-      for x in rel_ran:
-        lb += max(0,(w+1)-(k-x))
+      for i in xrange(len(rel_ran)):
+        lb += max(0,w+1-k+rel_ran[i])
       w += 1
     return ub
 
 
+def test_rapide_gf2(): # moins de deux min.
+  # (GF(),long,dim)
+  L = [(2,44,6),(2,77,15),(2,100,11),(2,33,5),(2,100,11),(2,45,7),(2,50,8),(2,44,5),(2,28,5),(2,100,25),(2,40,5),(2,15,4),(2,50,7),(2,50,5),(2,55,10),(2,55,9)]
+  print ("-------------------")
+  for x in L :
+    C = codes.random_linear_code(GF(x[0]),x[1],x[2])
+    print("For {} we have : ".format(C))
+    print (" ")
+    print("C.minimum_distance() : ")
+    a = %time C.minimum_distance()
+    print a
+    print (" ")
+    print("minimum_distance_brouwer(C) :")
+    b = %time minimum_distance_brouwer(C)
+    print b
+    print (" ")
+    print("minimum_distance_zimmermann(C) :")
+    c = %time minimum_distance_zimmermann(C)
+    print c
+    print ("-------------------")
 

@@ -216,6 +216,29 @@ def test_rapide(): # moins de deux min.
     print c
     print ("-------------------")
 
+
+def test_rapide_gf2(): # moins de deux min.
+  # (GF(),long,dim)
+  L = [(2,44,6),(2,77,15),(2,100,11),(2,33,5),(2,100,11),(2,45,7),(2,50,8),(2,44,5),(2,28,5),(2,100,25),(2,40,5),(2,15,4),(2,50,7),(2,50,5),(2,55,10),(2,55,9)]
+  print ("-------------------")
+  for x in L :
+    C = codes.random_linear_code(GF(x[0]),x[1],x[2])
+    print("For {} we have : ".format(C))
+    print (" ")
+    print("C.minimum_distance() : ")
+    a = %time C.minimum_distance()
+    print a
+    print (" ")
+    print("minimum_distance_brouwer(C) :")
+    b = %time minimum_distance_brouwer(C)
+    print b
+    print (" ")
+    print("minimum_distance_zimmermann(C) :")
+    c = %time minimum_distance_zimmermann(C)
+    print c
+    print ("-------------------")
+
+
 def test_lent():
   # (GF(),long,dim)
   L = [(7^2,35,6)]
@@ -245,10 +268,6 @@ def minimum_distance_zimmermann(C,maxiter=3):
     F = C.base_field()
     G2, num_info_set = infomation_set_brouwer_zimmer(G1,maxiter)
     R = G2.matrix_from_columns(range(num_info_set*k,n))
-    q = F.cardinality()
-    g = F.multiplicative_generator()
-    M = [g^i for i in xrange(q-1)]
-    Z = IntegerRing()
 
     if R.rank() == 0 :
       print "Brouwer 1 ! "
@@ -310,11 +329,18 @@ def minimum_distance_zimmermann(C,maxiter=3):
             ub = min(ub, A.hamming_weight())
             if ub <= lb :
               return ub
-        for i in xrange(len(rel_ran)):
-          lb += max(0,w+1-k+rel_ran[i])
+        sum = max(0,w+1-k+rel_ran[0])
+        for i in xrange(1,num_info_set):
+          sum += max(0,w+1-k+rel_ran[i])
+        lb = sum
         w += 1
       return ub
-      
+    
+    q = F.cardinality()
+    g = F.multiplicative_generator()
+    M = [g^i for i in xrange(q-1)]
+    Z = IntegerRing()
+       
     while w <= k and lb < ub :
       X = [F.zero()]*k
       for m in xrange(num_info_set) : # pour calculer G22 = L[m]
@@ -346,30 +372,12 @@ def minimum_distance_zimmermann(C,maxiter=3):
             ub = min(ub, A_int.hamming_weight())
             if ub <= lb :
               return ub
-      for i in xrange(len(rel_ran)):
-        lb += max(0,w+1-k+rel_ran[i])
+      sum = max(0,w+1-k+rel_ran[0])
+      for i in xrange(1,num_info_set):
+        sum += max(0,w+1-k+rel_ran[i])
+      lb = sum
       w += 1
     return ub
 
 
-def test_rapide_gf2(): # moins de deux min.
-  # (GF(),long,dim)
-  L = [(2,44,6),(2,77,15),(2,100,11),(2,33,5),(2,100,11),(2,45,7),(2,50,8),(2,44,5),(2,28,5),(2,100,25),(2,40,5),(2,15,4),(2,50,7),(2,50,5),(2,55,10),(2,55,9)]
-  print ("-------------------")
-  for x in L :
-    C = codes.random_linear_code(GF(x[0]),x[1],x[2])
-    print("For {} we have : ".format(C))
-    print (" ")
-    print("C.minimum_distance() : ")
-    a = %time C.minimum_distance()
-    print a
-    print (" ")
-    print("minimum_distance_brouwer(C) :")
-    b = %time minimum_distance_brouwer(C)
-    print b
-    print (" ")
-    print("minimum_distance_zimmermann(C) :")
-    c = %time minimum_distance_zimmermann(C)
-    print c
-    print ("-------------------")
 

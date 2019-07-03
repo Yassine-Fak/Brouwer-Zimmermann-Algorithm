@@ -213,13 +213,13 @@ def test_rapide(): # moins de deux min.
     print("minimum_distance_brouwer(C) :")
     b = %time minimum_distance_brouwer(C)
     print b
+    # print (" ")
+    # print("minimum_distance_zimmermann(C) :")
+    # c = %time minimum_distance_zimmermann(C)
+    # print c
     print (" ")
-    print("minimum_distance_zimmermann(C) :")
-    c = %time minimum_distance_zimmermann(C)
-    print c
-    print (" ")
-    print("minimum_distance_zimmermann_bis(C) :")
-    d = %time minimum_distance_zimmermann_bis(C)
+    print("minimum_distance_zimmermann_nv(C) :")
+    d = %time minimum_distance_zimmermann_nv(C)
     print d
     print ("-------------------")
 
@@ -239,13 +239,13 @@ def test_rapide_gf2(): # moins de deux min.
     print("minimum_distance_brouwer(C) :")
     b = %time minimum_distance_brouwer(C)
     print b
+    # print (" ")
+    # print("minimum_distance_zimmermann(C) :")
+    # c = %time minimum_distance_zimmermann(C)
+    # print c
     print (" ")
-    print("minimum_distance_zimmermann(C) :")
-    c = %time minimum_distance_zimmermann(C)
-    print c
-    print (" ")
-    print("minimum_distance_zimmermann_bis(C) :")
-    d = %time minimum_distance_zimmermann_bis(C)
+    print("minimum_distance_zimmermann_nv(C) :")
+    d = %time minimum_distance_zimmermann_nv(C)
     print d
     print ("-------------------")
 
@@ -265,10 +265,10 @@ def test_lent():
     print("minimum_distance_brouwer(C) :")
     b = %time minimum_distance_brouwer(C)
     print b
-    print (" ")
-    print("minimum_distance_zimmermann(C) :")
-    c = %time minimum_distance_zimmermann(C)
-    print c
+    # print (" ")
+    # print("minimum_distance_zimmermann(C) :")
+    # c = %time minimum_distance_zimmermann(C)
+    # print c
     print (" ")
     print("minimum_distance_zimmermann_nv(C) :")
     d = %time minimum_distance_zimmermann_nv(C)
@@ -383,7 +383,6 @@ def minimum_distance_zimmermann(C,maxiter=3):
         lb += (w+1)
       w += 1
     return ub
-
 
 
 def minimum_distance_zimmermann_nv(C,maxiter=3):

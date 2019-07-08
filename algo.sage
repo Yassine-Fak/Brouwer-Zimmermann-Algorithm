@@ -128,16 +128,76 @@ def list_of_system_gen_mat(M,m,k):
     return L
 
 
-def minimum_distance_brouwer(C,maxiter=5):
+def minimum_distance_brouwer(C,nb_words = 800000,maxiter=5):
 
-    G1 = C.generator_matrix()
     n,k = C.length(), C.dimension()
     F = C.base_field()
-    G2, num_info_set = infomation_set_brouwer(G1,maxiter)
-    L = list_of_system_gen_mat(G2,num_info_set,k)
+    q = F.cardinality()
     ub = n - k + 1
-    lb = num_info_set
     w = 1
+    if q^k <= nb_words :
+      print("Here we use one information set ! ")
+      G = systematique_form(C.generator_matrix())
+      lb = 1
+      if F == GF(2) :
+        while w <= k and lb < ub : 
+          A = G.row(0)
+          for i in xrange(1,w):
+            A += G.row(i)
+          ub = min(ub, A.hamming_weight())
+          if ub <= lb :
+            return ub
+          for i,j in combinations(k,w):
+            A += G.row(i) + G.row(j)
+            ub = min(ub, A.hamming_weight())
+            if ub <= lb :
+              return ub
+          lb += 1 
+          w += 1
+        return ub
+
+      g = F.multiplicative_generator()
+      M = [g^i for i in xrange(q-1)]
+      Z = IntegerRing()
+
+      while w <= k and lb < ub :
+        X = [F.zero()]*k
+        A = G.row(0)
+        for i in xrange(1,w):
+          A += G.row(i)
+        a = [0]*w
+        for v in xrange((q-1)^w):
+          a_anc = copy(a)
+          a = Z(v).digits(q-1,padto=w)
+          for i in xrange(w):
+            X[i] = M[a[w-1-i]]  
+          a_supp = []
+          for i in xrange(w):
+            if a[i] != a_anc[i]:
+              a_supp += [i]
+          
+          for i in a_supp :
+            A += (M[a[i]] - M[a_anc[i]])*G.row(w-1-i)
+
+          ub = min(ub, A.hamming_weight())
+          if ub <= lb :
+            return ub
+          
+          A_int = copy(A) 
+          for i,j in combinations(k,w):
+            X[j] = X[i]
+            X[i] = F.zero()
+            A_int += X[j]*(G.row(j) - G.row(i))
+            ub = min(ub, A_int.hamming_weight())
+            if ub <= lb :
+              return ub
+        lb += 1
+        w += 1
+      return ub
+
+    G2, num_info_set = infomation_set_brouwer(C.generator_matrix(),maxiter)
+    L = list_of_system_gen_mat(G2,num_info_set,k)
+    lb = num_info_set
     print("The number of disjoint information set is : {} ".format(num_info_set))
     
     if F == GF(2) :
@@ -322,16 +382,16 @@ def test_rapide(): # moins de deux min.
     print("minimum_distance_brouwer(C) :")
     b = %time minimum_distance_brouwer(C)
     print b
-    print (" ")
-    print("minimum_distance_zimmermann(C) :")
-    d = %time minimum_distance_zimmermann(C)
-    print d
+    # print (" ")
+    # print("minimum_distance_zimmermann(C) :")
+    # d = %time minimum_distance_zimmermann(C)
+    # print d
     print ("-------------------")
 
 
 def test_rapide_gf2(): # moins de deux min.
   # (GF(),long,dim)
-  L = [(2,96,32),(2,128,32),(2,44,6),(2,77,15),(2,100,11),(2,33,5),(2,100,11),(2,45,7),(2,50,8),(2,44,5),(2,28,5),(2,100,25),(2,40,5),(2,15,4),(2,50,7),(2,50,5),(2,55,10),(2,55,9)]
+  L = [(2,44,6),(2,77,15),(2,100,11),(2,33,5),(2,100,11),(2,45,7),(2,50,8),(2,44,5),(2,28,5),(2,100,25),(2,40,5),(2,15,4),(2,50,7),(2,50,5),(2,55,10),(2,55,9)]
   print ("-------------------")
   for x in L :
     C = codes.random_linear_code(GF(x[0]),x[1],x[2])
@@ -344,10 +404,10 @@ def test_rapide_gf2(): # moins de deux min.
     print("minimum_distance_brouwer(C) :")
     b = %time minimum_distance_brouwer(C)
     print b
-    print (" ")
-    print("minimum_distance_zimmermann(C) :")
-    d = %time minimum_distance_zimmermann(C)
-    print d
+    # print (" ")
+    # print("minimum_distance_zimmermann(C) :")
+    # d = %time minimum_distance_zimmermann(C)
+    # print d
     print ("-------------------")
 
 
@@ -372,3 +432,27 @@ def test_lent():
     print d
     print ("-------------------")
 
+def test_lent_gf2():
+  # (GF(),long,dim)
+  L = [(2,128,32),(2,96,32)]
+  print ("-------------------")
+  for x in L :
+    C = codes.random_linear_code(GF(x[0]),x[1],x[2])
+    print("For {} we have : ".format(C))
+    print (" ")
+    print("C.minimum_distance() : ")
+    a = %time C.minimum_distance()
+    print a
+    print (" ")
+    print("minimum_distance_brouwer(C) :")
+    b = %time minimum_distance_brouwer(C)
+    print b
+    print (" ")
+    print("minimum_distance_zimmermann(C) :")
+    d = %time minimum_distance_zimmermann(C)
+    print d
+    print ("-------------------")
+
+# parfois meme pour une petite cardinalite, il vaut mieux Brouwer
+# C = codes.random_linear_code(GF(11),50,6) one_i_s renvoie le res dans 1min16 et brouwer 16 sec
+# C = codes.random_linear_code(GF(2), 96, 15) brouwer est mieux pourtant 2**15 mots

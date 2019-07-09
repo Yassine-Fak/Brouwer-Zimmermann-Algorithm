@@ -127,77 +127,86 @@ def list_of_system_gen_mat(M,m,k):
 
     return L
 
+def minimum_distance_one_information_set(C):
+    n,k = C.length(), C.dimension()
+    F = C.base_field()
+    q = F.cardinality()
+    ub = n - k + 1
+    w = 1
+    G = systematique_form(C.generator_matrix())
+    lb = 1
+    if F == GF(2) :
+      while w <= k and lb < ub : 
+        A = G.row(0)
+        for i in xrange(1,w):
+          A += G.row(i)
+        ub = min(ub, A.hamming_weight())
+        if ub <= lb :
+          return ub
+        for i,j in combinations(k,w):
+          A += G.row(i) + G.row(j)
+          ub = min(ub, A.hamming_weight())
+          if ub <= lb :
+            return ub
+        lb += 1 
+        w += 1
+      return ub
+
+    g = F.multiplicative_generator()
+    M = [g^i for i in xrange(q-1)]
+    Z = IntegerRing()
+
+    while w <= k and lb < ub :
+      X = [F.zero()]*k
+      A = G.row(0)
+      for i in xrange(1,w):
+        A += G.row(i)
+      a = [0]*w
+      for v in xrange((q-1)^w):
+        a_anc = copy(a)
+        a = Z(v).digits(q-1,padto=w)
+        for i in xrange(w):
+          X[i] = M[a[w-1-i]]  
+        a_supp = []
+        for i in xrange(w):
+          if a[i] != a_anc[i]:
+            a_supp += [i]
+        
+        for i in a_supp :
+          A += (M[a[i]] - M[a_anc[i]])*G.row(w-1-i)
+
+        ub = min(ub, A.hamming_weight())
+        if ub <= lb :
+          return ub
+        
+        A_int = copy(A)
+        for i,j in combinations(k,w):
+          X[j] = X[i]
+          X[i] = F.zero()
+          A_int += X[j]*(G.row(j) - G.row(i))
+          ub = min(ub, A_int.hamming_weight())
+          if ub <= lb :
+            return ub
+      lb += 1
+      w += 1
+    return ub
+
 
 def minimum_distance_brouwer(C, nb_words=900000, maxiter=5):
 
     n,k = C.length(), C.dimension()
     F = C.base_field()
     q = F.cardinality()
-    ub = n - k + 1
     w = 1
+
     if q^k <= nb_words :
       print("Here we use one information set ! ")
-      G = systematique_form(C.generator_matrix())
-      lb = 1
-      if F == GF(2) :
-        while w <= k and lb < ub : 
-          A = G.row(0)
-          for i in xrange(1,w):
-            A += G.row(i)
-          ub = min(ub, A.hamming_weight())
-          if ub <= lb :
-            return ub
-          for i,j in combinations(k,w):
-            A += G.row(i) + G.row(j)
-            ub = min(ub, A.hamming_weight())
-            if ub <= lb :
-              return ub
-          lb += 1 
-          w += 1
-        return ub
-
-      g = F.multiplicative_generator()
-      M = [g^i for i in xrange(q-1)]
-      Z = IntegerRing()
-
-      while w <= k and lb < ub :
-        X = [F.zero()]*k
-        A = G.row(0)
-        for i in xrange(1,w):
-          A += G.row(i)
-        a = [0]*w
-        for v in xrange((q-1)^w):
-          a_anc = copy(a)
-          a = Z(v).digits(q-1,padto=w)
-          for i in xrange(w):
-            X[i] = M[a[w-1-i]]  
-          a_supp = []
-          for i in xrange(w):
-            if a[i] != a_anc[i]:
-              a_supp += [i]
-          
-          for i in a_supp :
-            A += (M[a[i]] - M[a_anc[i]])*G.row(w-1-i)
-
-          ub = min(ub, A.hamming_weight())
-          if ub <= lb :
-            return ub
-          
-          A_int = copy(A) 
-          for i,j in combinations(k,w):
-            X[j] = X[i]
-            X[i] = F.zero()
-            A_int += X[j]*(G.row(j) - G.row(i))
-            ub = min(ub, A_int.hamming_weight())
-            if ub <= lb :
-              return ub
-        lb += 1
-        w += 1
-      return ub
-
+      return minimum_distance_one_information_set(C)
+      
     G2, num_info_set = infomation_set_brouwer(C.generator_matrix(),maxiter)
     L = list_of_system_gen_mat(G2,num_info_set,k)
     lb = num_info_set
+    ub = n - k + 1
     print("The number of disjoint information set is : {} ".format(num_info_set))
     
     if F == GF(2) :
@@ -293,10 +302,12 @@ def minimum_distance_zimmermann(C,maxiter=5):
         if c == k :
           break    
       L = list_of_system_gen_mat(G2,num_info_set,k) + [A.inverse()*G2]
+      R = [k]*num_info_set + [r]
       num_info_set += 1
 
     else :
       L = list_of_system_gen_mat(G2,num_info_set,k)
+      R = [k]*num_info_set
 
     print("The number of disjoint information set is : {} ".format(num_info_set))
     lb = 1
@@ -305,22 +316,22 @@ def minimum_distance_zimmermann(C,maxiter=5):
 
     if F == GF(2) :
       while w <= k and lb < ub :
+        lb_int = copy(lb)
+        lb = 0
         for m in xrange(num_info_set) : # pour calculer G22 = L[m]
           A = L[m].row(0)
           for i in xrange(1,w):
             A += L[m].row(i)
           ub = min(ub, A.hamming_weight())
-          if ub <= lb :
+          if ub <= lb_int :
             return ub
 
           for i,j in combinations(k,w):
             A += L[m].row(i) + L[m].row(j)
             ub = min(ub, A.hamming_weight())
-            if ub <= lb :
+            if ub <= lb_int :
               return ub
-        lb = max(0,w+1-k+r)
-        for i in xrange(num_info_set-1):
-          lb += (w+1)
+          lb += max(0,w+1-k+R[m])
         w += 1
       return ub
     
@@ -331,6 +342,8 @@ def minimum_distance_zimmermann(C,maxiter=5):
        
     while w <= k and lb < ub :
       X = [F.zero()]*k
+      lb_int = copy(lb)
+      lb = 0
       for m in xrange(num_info_set) : # pour calculer G22 = L[m]
         A = L[m].row(0)
         for i in xrange(1,w):
@@ -349,7 +362,7 @@ def minimum_distance_zimmermann(C,maxiter=5):
             A += (M[a[i]] - M[a_anc[i]])*L[m].row(w-1-i)
 
           ub = min(ub, A.hamming_weight())
-          if ub <= lb :
+          if ub <= lb_int :
             return ub
           
           A_int = copy(A) 
@@ -358,158 +371,9 @@ def minimum_distance_zimmermann(C,maxiter=5):
             X[i] = F.zero()
             A_int += X[j]*(L[m].row(j) - L[m].row(i))
             ub = min(ub, A_int.hamming_weight())
-            if ub <= lb :
+            if ub <= lb_int :
               return ub
-      lb = max(0,w+1-k+r)
-      for i in xrange(num_info_set-1):
-        lb += (w+1)
-      w += 1
-    return ub
-
-
-def minimum_distance_zimmermann_nv(C,maxiter=5):
-
-    G1 = C.generator_matrix()
-    n,k = C.length(), C.dimension()
-    F = C.base_field()
-    G2, num_info_set = infomation_set_zimmermann(G1,maxiter)
-    R = G2.matrix_from_columns(range(num_info_set*k,n))
-    R_pivot = R.pivots()
-    r = len(R_pivot)
-
-    if r != 0:
-      b = range(num_info_set*k) + [num_info_set*k + i for i in R_pivot]
-      c = copy(b)
-      for i in range(n):
-        if i in b:
-          pass
-        else:
-          c += [i]
-      d = [i + 1 for i in c]
-      d = Permutation(d)
-      G2.permute_columns(d)
-      I = range(num_info_set*k,num_info_set*k+r)
-      A = G2.matrix_from_columns(I)
-      c = 0
-      while A.rank() != k:
-        if A.rank() < G2.matrix_from_columns(I + [c]).rank():
-          A = G2.matrix_from_columns(I + [c])
-          I += [c]
-        c += 1
-        if c == k :
-          break    
-      L = list_of_system_gen_mat(G2,num_info_set,k) + [A.inverse()*G2]
-      num_info_set += 1
-
-    else :
-      L = list_of_system_gen_mat(G2,num_info_set,k)
-
-    print("The number of disjoint information set is : {} ".format(num_info_set))
-    lb = num_info_set-2
-    ub = n - k + 1
-    w = 1
-
-    if F == GF(2) :
-      while w <= k and lb < ub :
-        
-        for m in xrange(num_info_set-1) : # pour calculer G22 = L[m]
-          A = L[m].row(0)
-          for i in xrange(1,w):
-            A += L[m].row(i)
-          ub = min(ub, A.hamming_weight())
-          if ub <= lb :
-            return ub
-
-          for i,j in combinations(k,w):
-            A += L[m].row(i) + L[m].row(j)
-            ub = min(ub, A.hamming_weight())
-            if ub <= lb :
-              return ub
-          lb += 1
-        
-        A = L[num_info_set-1].row(0)
-        for i in xrange(1,w):
-          A += L[num_info_set-1].row(i)
-        ub = min(ub, A.hamming_weight())
-        if ub <= lb :
-          return ub
-
-        for i,j in combinations(k,w):
-          A += L[num_info_set-1].row(i) + L[num_info_set-1].row(j)
-          ub = min(ub, A.hamming_weight())
-          if ub <= lb :
-            return ub
-        lb += max(0,w+1-k+r)
-        w += 1
-      return ub
-   
-    q = F.cardinality()
-    g = F.multiplicative_generator()
-    M = [g^i for i in xrange(q-1)]
-    Z = IntegerRing()
-       
-    while w <= k and lb < ub :
-      X = [F.zero()]*k
-      for m in xrange(num_info_set-1) : # pour calculer G22 = L[m]
-        A = L[m].row(0)
-        for i in xrange(1,w):
-          A += L[m].row(i)
-        a = [0]*w
-        for v in xrange((q-1)^w):
-          a_anc = copy(a)
-          a = Z(v).digits(q-1,padto=w)
-          for i in xrange(w):
-            X[i] = M[a[w-1-i]]  
-          a_supp = []
-          for i in xrange(w):To cite this version:
-            if a[i] != a_anc[i]:
-              a_supp += [i]
-          for i in a_supp :
-            A += (M[a[i]] - M[a_anc[i]])*L[m].row(w-1-i)
-
-          ub = min(ub, A.hamming_weight())
-          if ub <= lb :
-            return ub
-          
-          A_int = copy(A) 
-          for i,j in combinations(k,w):
-            X[j] = X[i]
-            X[i] = F.zero()
-            A_int += X[j]*(L[m].row(j) - L[m].row(i))
-            ub = min(ub, A_int.hamming_weight())
-            if ub <= lb :
-              return ub
-        lb += 1
-
-      A = L[num_info_set-1].row(0)
-      for i in xrange(1,w):
-        A += L[num_info_set-1].row(i)
-      a = [0]*w
-      for v in xrange((q-1)^w):
-        a_anc = copy(a)
-        a = Z(v).digits(q-1,padto=w)
-        for i in xrange(w):
-          X[i] = M[a[w-1-i]]  
-        a_supp = []
-        for i in xrange(w):
-          if a[i] != a_anc[i]:
-            a_supp += [i]
-        for i in a_supp :
-          A += (M[a[i]] - M[a_anc[i]])*L[num_info_set-1].row(w-1-i)
-
-        ub = min(ub, A.hamming_weight())
-        if ub <= lb :
-          return ub
-        
-        A_int = copy(A) 
-        for i,j in combinations(k,w):
-          X[j] = X[i]
-          X[i] = F.zero()
-          A_int += X[j]*(L[num_info_set-1].row(j) - L[num_info_set-1].row(i))
-          ub = min(ub, A_int.hamming_weight())
-          if ub <= lb :
-            return ub
-      lb = max(0,w+1-k+r)
+        lb += max(0,w+1-k+R[m])
       w += 1
     return ub
 
@@ -530,9 +394,9 @@ def test_rapide(): # moins de deux min.
     b = %time minimum_distance_brouwer(C)
     print b
     print (" ")
-    print("minimum_distance_zimmermann_nv(C) :")
-    d = %time minimum_distance_zimmermann_nv(C)
-    print d
+    print("minimum_distance_zimmermann(C) :")
+    e = %time minimum_distance_zimmermann(C)
+    print e
     print ("-------------------")
 
 
@@ -552,8 +416,8 @@ def test_rapide_gf2(): # moins de deux min.
     b = %time minimum_distance_brouwer(C)
     print b
     print (" ")
-    print("minimum_distance_zimmermann_nv(C) :")
-    d = %time minimum_distance_zimmermann_nv(C)
+    print("minimum_distance_zimmermann(C) :")
+    d = %time minimum_distance_zimmermann(C)
     print d
     print ("-------------------")
 
@@ -601,8 +465,3 @@ def test_lent_gf2():
     print d
     print ("-------------------")
 
-
-# parfois meme pour une petite cardinalite, il vaut mieux Brouwer
-# C = codes.random_linear_code(GF(11),50,6) one_i_s renvoie le res dans 1min16 et brouwer 16 sec
-# C = codes.random_linear_code(GF(2), 96, 15) brouwer est mieux pourtant 2**15 mots n'est pas grand
-# C = codes.random_linear_code(GF(11), 33, 5) Pareil 

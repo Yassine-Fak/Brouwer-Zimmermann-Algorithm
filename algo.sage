@@ -45,30 +45,6 @@ def infomation_set(G):
     return (M,num_info_set)
 
 
-def infomation_set_brouwer(G, maxiter):
-
-    k = G.nrows()
-    n = G.ncols()
-    M, num_info_set = infomation_set(G)
-    q = n//k
-    i = 0
-
-    while i < maxiter and num_info_set != q :
-
-      M_inter = copy(G)
-      p = Permutations(n).random_element()
-      M_inter.permute_columns(p)
-      M_inter, num_info_set_inter = infomation_set(M_inter)
-
-      if num_info_set_inter > num_info_set :
-        M = copy(M_inter)
-        num_info_set = num_info_set_inter
-
-      i += 1
-
-    return (M,num_info_set)
-
-
 def infomation_set_zimmermann(G, maxiter):
 
     k = G.nrows()
@@ -117,15 +93,6 @@ def infomation_set_zimmermann(G, maxiter):
 
     return (M,num_info_set)
 
-
-def list_of_system_gen_mat(M,m,k):
-
-    L = []
-    for i in xrange(m):
-      A = M.matrix_from_columns(xrange(i*k , i*k + k))
-      L = L + [A.inverse()*M]
-
-    return L
 
 def minimum_distance_one_information_set(C):
     n,k = C.length(), C.dimension()
@@ -202,9 +169,12 @@ def minimum_distance_brouwer(C, nb_words=900000, maxiter=5):
     if q^k <= nb_words :
       print("Here we use one information set ! ")
       return minimum_distance_one_information_set(C)
-      
-    G2, num_info_set = infomation_set_brouwer(C.generator_matrix(),maxiter)
-    L = list_of_system_gen_mat(G2,num_info_set,k)
+
+    G2, num_info_set = infomation_set_distance(C.generator_matrix(),maxiter, method = "brouwer")
+    L = []
+    for i in xrange(num_info_set):
+      A = G2.matrix_from_columns(xrange(i*k , i*k + k))
+      L += [A.inverse()*G2]
     lb = num_info_set
     ub = n - k + 1
     print("The number of disjoint information set is : {} ".format(num_info_set))
@@ -465,3 +435,117 @@ def test_lent_gf2():
     print d
     print ("-------------------")
 
+
+#  l'idee est que j'tulise la fonction que j'ai deja pour zimmerman 
+def infomation_set_distance(G,maxiter, method = "zimmermann"):
+  
+    k = G.nrows()
+    n = G.ncols()
+    M, num_info_set = infomation_set(G)
+    R = M.matrix_from_columns(range(num_info_set*k,n))
+    q = n//k
+    r = n%k
+    i = 1
+    c = 1
+
+    if method == "brouwer" :
+      while i <= maxiter and num_info_set != q :
+        M_inter = copy(G)
+        p = Permutations(n).random_element()
+        M_inter.permute_columns(p)
+        M_inter, num_info_set_inter = infomation_set(M_inter)
+        if num_info_set_inter > num_info_set :
+          M = copy(M_inter)
+          num_info_set = num_info_set_inter
+        i += 1
+      return (M,num_info_set)
+
+    # method = "zimmermann"  
+    while i <= maxiter and num_info_set != q and R.rank() != r:
+
+      M_inter = copy(G)
+      p = Permutations(n).random_element()
+      M_inter.permute_columns(p)
+      M_inter, num_info_set_inter = infomation_set(M_inter)
+      R_inter = M_inter.matrix_from_columns(range(num_info_set_inter*k,n))
+
+      if num_info_set_inter > num_info_set :
+        M = copy(M_inter)
+        R = copy(R_inter)
+        num_info_set = num_info_set_inter
+        i += 1
+        continue
+
+      if num_info_set_inter < num_info_set :
+        i += 1
+        continue
+
+      if num_info_set == num_info_set_inter :
+
+        if R.rank() >= R_inter.rank() :
+          i += 1
+          continue
+
+        else :
+          M = copy(M_inter)
+          R = copy(R_inter)
+          i += 1
+          continue
+
+      if num_info_set_inter == q and R_inter.rank() == r :
+        M = copy(M_inter)
+        return (M,[k]*num_info_set_inter + [r])
+
+
+    # le cas ideal
+    if num_info_set == q and R.rank() == r:
+      list_of_ranks = [k]*num_info_set + [r]
+      return (M,list_of_ranks)
+    
+    if R_inter.rank() == 0:
+      list_of_ranks = [k]*num_info_set
+      return (M,list_of_ranks)
+
+    while i <= maxiter:
+      M_inter = copy(G)
+      p = Permutations(n).random_element()
+      M_inter.permute_columns(p)
+      M_inter, num_info_set_inter = infomation_set(M_inter)
+      # je cherche a maximiser le nbre d'IS disjoint  
+      if num_info_set_inter < num_info_set: # si cette condition est tjr satifaite qui ce qu'je fait 
+        i += 1
+        pass
+      R_inter = M_inter.matrix_from_columns(range(num_info_set_inter*k,n))
+      list_of_ranks = [k]*num_info_set_inter
+      
+      # le cas ideal
+      if num_info_set_inter == q and R_inter.rank() == r:
+        M = copy(M_inter)
+        list_of_ranks += [r]
+        return (M,list_of_ranks)
+
+      if R_inter.rank() == 0:
+        M = copy(M_inter)
+        return (M,list_of_ranks)
+      
+      while R_inter.rank() != 0:
+        R_inter_pivots = R_inter.pivots()
+        len_of_R_inter_pivots = len(R_inter_pivots)
+        b = range(n - R_inter.ncols()) + [n - R_inter.ncols() + i for i in R_inter_pivots]
+        c = copy(b)
+        for i in range(n):
+          if i in b:
+            pass
+          else:
+            c += [i]
+        d = [i + 1 for i in c]
+        d = Permutation(d) 
+        M_inter.permute_columns(d)
+        list_of_ranks += [len_of_R_inter_pivots]
+        R_inter = M_inter.matrix_from_columns(range(sum(list_of_ranks),n))
+        num_info_set_inter += 1
+      M = copy(M_inter)
+      i += 1
+    return (M,list_of_ranks)
+
+# je vais terminer la fonction des information set pour zimmerman et crer une autre pour completer les colonnes des is qui ne sont pas dijoint et apres faire les prediction  

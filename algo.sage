@@ -331,7 +331,9 @@ def minimum_distance_zimmermann(C,maxiter=5):
     lb = 1
     ub = n - k + 1
     w = 1
-    print("The number of disjoint information set is : {} ".format(num_info_set))
+    print("Code Minimum Weight Zimmermann: length {}, dimension {}".format(n,k))
+    print("Lower Bound: {} , Upper Bound: {}".format(lb,ub))
+    print("relative ranks used: {}".format(list_of_ranks))
     if F == GF(2) :
       while w <= k and lb < ub :
         lb_int = copy(lb)
@@ -391,12 +393,13 @@ def minimum_distance_zimmermann(C,maxiter=5):
             ub = min(ub, A_int.hamming_weight())
             if ub <= lb_int :
               return ub
-        lb += max(0,w+1-k+list_of_ranks[m])
+        lb += max(0,w+1-k+list_of_ranks[m])  
       w += 1
+      print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
     return ub
 
 
-def test_rapide(): # moins de deux min.
+def test_rapide(): 
   # (GF(),long,dim)
   L = [(7,30,9),(3,60,15),(3,64,16),(3,68,17),(5,44,11),(5,48,12),(7,36,9),(7,40,10),(8,36,9),(8,40,10),(9,32,8),(9,36,9),(3,45,7),(11,33,5),(3,100,11),(11,44,6),(2,77,15),(2,100,11),(9,50,8),(5,44,5),(25,28,5),(2,100,25),(7,40,5),(17,15,4),(7,50,7),(11,50,5),(5,55,10),(5,55,9)]
   print ("-------------------")
@@ -418,7 +421,7 @@ def test_rapide(): # moins de deux min.
     print ("-------------------")
 
 
-def test_rapide_gf2(): # moins de deux min.
+def test_rapide_gf2():
   # (GF(),long,dim)
   L = [(2,44,6),(2,77,15),(2,100,11),(2,33,5),(2,100,11),(2,45,7),(2,50,8),(2,44,5),(2,28,5),(2,100,25),(2,40,5),(2,15,4),(2,50,7),(2,50,5),(2,55,10),(2,55,9)]
   print ("-------------------")

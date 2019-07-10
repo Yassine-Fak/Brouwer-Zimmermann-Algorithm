@@ -352,6 +352,7 @@ def minimum_distance_zimmermann(C,maxiter=5):
             if ub <= lb_int :
               return ub
           lb += max(0,w+1-k+list_of_ranks[m])
+          lb_int = copy(lb)  
         w += 1
         print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
       return ub
@@ -394,7 +395,8 @@ def minimum_distance_zimmermann(C,maxiter=5):
             ub = min(ub, A_int.hamming_weight())
             if ub <= lb_int :
               return ub
-        lb += max(0,w+1-k+list_of_ranks[m])  
+        lb += max(0,w+1-k+list_of_ranks[m])
+        lb_int = copy(lb)  
       w += 1
       print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
     return ub

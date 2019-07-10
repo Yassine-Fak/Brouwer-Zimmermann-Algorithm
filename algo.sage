@@ -582,6 +582,7 @@ def minimum_distance_zimmermann(C,maxiter=5):
               return ub
           lb += max(0,w+1-k+list_of_ranks[m])
         w += 1
+        print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
       return ub
     
     q = F.cardinality()

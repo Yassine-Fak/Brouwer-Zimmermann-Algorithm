@@ -436,7 +436,6 @@ def test_lent_gf2():
     print ("-------------------")
 
 
-#  l'idee est que j'tulise la fonction que j'ai deja pour zimmerman 
 def infomation_set_distance(G,maxiter, method = "zimmermann"):
   
     k = G.nrows()
@@ -461,6 +460,17 @@ def infomation_set_distance(G,maxiter, method = "zimmermann"):
       return (M,num_info_set)
 
     # method = "zimmermann"  
+    # Dans le cas de zimmermann la fonction renvoie la liste des rangs
+
+    # Le cas ideal 
+    if num_info_set == q and R.rank() == r:
+      return (M,[k]*num_info_set + [r])
+    
+    # Le cas patho.
+    if R.rank() == 0:
+      return (M,[k]*num_info_set)
+    
+    # Je chercher a maximiser le nombre d'IS et le range de R
     while i <= maxiter and num_info_set != q and R.rank() != r:
 
       M_inter = copy(G)
@@ -496,56 +506,93 @@ def infomation_set_distance(G,maxiter, method = "zimmermann"):
         M = copy(M_inter)
         return (M,[k]*num_info_set_inter + [r])
 
+    list_of_ranks = [k]*num_info_set
 
-    # le cas ideal
-    if num_info_set == q and R.rank() == r:
-      list_of_ranks = [k]*num_info_set + [r]
+    if R.rank() == 0:
       return (M,list_of_ranks)
     
-    if R_inter.rank() == 0:
-      list_of_ranks = [k]*num_info_set
-      return (M,list_of_ranks)
-
-    while i <= maxiter:
-      M_inter = copy(G)
-      p = Permutations(n).random_element()
-      M_inter.permute_columns(p)
-      M_inter, num_info_set_inter = infomation_set(M_inter)
-      # je cherche a maximiser le nbre d'IS disjoint  
-      if num_info_set_inter < num_info_set: # si cette condition est tjr satifaite qui ce qu'je fait 
-        i += 1
-        pass
-      R_inter = M_inter.matrix_from_columns(range(num_info_set_inter*k,n))
-      list_of_ranks = [k]*num_info_set_inter
-      
-      # le cas ideal
-      if num_info_set_inter == q and R_inter.rank() == r:
-        M = copy(M_inter)
-        list_of_ranks += [r]
-        return (M,list_of_ranks)
-
-      if R_inter.rank() == 0:
-        M = copy(M_inter)
-        return (M,list_of_ranks)
-      
-      while R_inter.rank() != 0:
-        R_inter_pivots = R_inter.pivots()
-        len_of_R_inter_pivots = len(R_inter_pivots)
-        b = range(n - R_inter.ncols()) + [n - R_inter.ncols() + i for i in R_inter_pivots]
-        c = copy(b)
-        for i in range(n):
-          if i in b:
-            pass
-          else:
-            c += [i]
-        d = [i + 1 for i in c]
-        d = Permutation(d) 
-        M_inter.permute_columns(d)
-        list_of_ranks += [len_of_R_inter_pivots]
-        R_inter = M_inter.matrix_from_columns(range(sum(list_of_ranks),n))
-        num_info_set_inter += 1
-      M = copy(M_inter)
-      i += 1
+    # Ici je suppose qu'on a fait toutes les iterations sans atteindre la cas ideal 
+    # Mnt on va essayer d'augmenter le nombre d'information set
+    while R.rank() != 0 :
+      R_pivots = R.pivots()
+      len_of_R_pivots = len(R_pivots)
+      b = range(n - R.ncols()) + [n - R.ncols() + i for i in R_pivots]
+      c = copy(b)
+      for i in range(n):
+        if i in b:
+          pass
+        else:
+          c += [i]
+      d = [i + 1 for i in c]
+      d = Permutation(d) 
+      M.permute_columns(d)
+      list_of_ranks += [len_of_R_pivots]
+      R = M.matrix_from_columns(range(sum(list_of_ranks),n))
     return (M,list_of_ranks)
+
+
+def list_of_system_gen_mat_zimm(M,list_of_ranks):
+    n = M.ncols()
+    k = M.nrows()
+    l = len(list_of_ranks)
+    L = []
+    num_dis_is = 0
+    num_over_is = 0
+
+    for i in xrange(l) :
+      if list_of_ranks[i] == k :
+        num_dis_is += 1
+      else :
+        num_over_is += 1
+    for i in xrange(num_dis_is) :
+      A = M.matrix_from_columns(range(i*k, i*k + k))
+      L += [A.inverse()*G2]
+    
+    aux_ind = k*num_dis_is
+    for i in xrange(-num_over_is,0) :
+      I = range(aux_ind, aux_ind + list_of_ranks[i])
+      A = M.matrix_from_columns(I)
+      c = 0
+      while A.rank() != k:
+        if A.rank() < G2.matrix_from_columns(I + [c]).rank():
+          A = G2.matrix_from_columns(I + [c])
+          I += [c]
+        c += 1
+        if c == k :
+          break
+      L += [A.inverse()*G2]
+      aux_ind += list_of_ranks[i]
+    return L
+
+  
+
+
+
+
+
+
+
+
+    L = []
+    for i in xrange(num_info_set):
+      A = G2.matrix_from_columns(xrange(i*k , i*k + k))
+      L += [A.inverse()*G2]
+
+    R = G2.matrix_from_columns(range(num_info_set*k,n))
+    R_pivot = R.pivots()
+    r = len(R_pivot)
+
+    I = range(num_info_set*k,num_info_set*k+r)
+    A = G2.matrix_from_columns(I)
+    c = 0
+    while A.rank() != k:
+      if A.rank() < G2.matrix_from_columns(I + [c]).rank():
+        A = G2.matrix_from_columns(I + [c])
+        I += [c]
+      c += 1
+      if c == k :
+        break    
+    L = list_of_system_gen_mat(G2,num_info_set,k) + [A.inverse()*G2]
+
 
 # je vais terminer la fonction des information set pour zimmerman et crer une autre pour completer les colonnes des is qui ne sont pas dijoint et apres faire les prediction  

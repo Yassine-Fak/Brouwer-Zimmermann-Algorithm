@@ -339,21 +339,37 @@ def minimum_distance_zimmermann(C,maxiter=5):
 
     lb = num_disj_info_set         
     print("Lower Bound: {} , Upper Bound: {}".format(lb,ub))
+    
+    # Ici je calcul le premier 'maximum projected"
+    maximum_projected = 0
+    lb_inter = 0 
+    while lb_inter < ub:
+      maximum_projected += 1
+      lb_inter = maximum_projected + 1 
+      for m in xrange(1,num_info_set):
+        lb_inter += max(0,maximum_projected+1-k+list_of_ranks[m])
+    print("Maximum Projected w : {}".format(maximum_projected))
+
     if F == GF(2) :
-      while w <= k and lb < ub :
+      while w < maximum_projected and lb < ub :
         for m in xrange(num_info_set) : # pour calculer G22 = L[m]
           A = L[m].row(0)
           for i in xrange(1,w):
             A += L[m].row(i)
-          ub = min(ub, A.hamming_weight())
-          if ub <= lb :
-            return ub
+          if ub > A.hamming_weight():
+            ub = A.hamming_weight()
+            print("New upper bound : {}".format(ub))
+            if ub <= lb :
+              return ub
 
           for i,j in combinations(k,w):
             A += L[m].row(i) + L[m].row(j)
-            ub = min(ub, A.hamming_weight())
-            if ub <= lb :
-              return ub
+            if ub > A.hamming_weight():
+              ub = A.hamming_weight()
+              print("New upper bound : {}".format(ub))
+              if ub <= lb :
+                return ub
+          
           if max(0,w+1-k+list_of_ranks[m]) != 0:
             lb += 1
         w += 1
@@ -365,7 +381,7 @@ def minimum_distance_zimmermann(C,maxiter=5):
     M = [g^i for i in xrange(q-1)]
     Z = IntegerRing()
        
-    while w <= k and lb < ub :
+    while w < maximum_projected and lb < ub :
       X = [F.zero()]*k
       for m in xrange(num_info_set) : # pour calculer G22 = L[m]
         A = L[m].row(0)
@@ -403,6 +419,8 @@ def minimum_distance_zimmermann(C,maxiter=5):
     return ub
 
 
+
+
 def test_rapide(): 
   # (GF(),long,dim)
   L = [(7,30,9),(3,60,15),(3,64,16),(3,68,17),(5,44,11),(5,48,12),(7,36,9),(7,40,10),(8,36,9),(8,40,10),(9,32,8),(9,36,9),(3,45,7),(11,33,5),(3,100,11),(11,44,6),(2,77,15),(2,100,11),(9,50,8),(5,44,5),(25,28,5),(2,100,25),(7,40,5),(17,15,4),(7,50,7),(11,50,5),(5,55,10),(5,55,9)]
@@ -437,10 +455,10 @@ def test_rapide_gf2():
     a = %time C.minimum_distance()
     print a
     print (" ")
-    print("minimum_distance_brouwer(C) :")
-    b = %time minimum_distance_brouwer(C,nb_words=1)
-    print b
-    print (" ")
+    # print("minimum_distance_brouwer(C) :")
+    # b = %time minimum_distance_brouwer(C,nb_words=1)
+    # print b
+    # print (" ")
     print("minimum_distance_zimmermann(C) :")
     d = %time minimum_distance_zimmermann(C)
     print d

@@ -320,6 +320,18 @@ def minimum_distance_brouwer(C, nb_words=900000, maxiter=5):
     return ub
 
 
+def maximum_projected_function(ub,list_of_ranks,num_info_set,num_disj_info_set):
+    maximum_projected = 0
+    k = list_of_ranks[0]
+    lb = 0 
+    while lb < ub:
+      maximum_projected += 1
+      lb = (maximum_projected + 1)*num_disj_info_set 
+      for m in xrange(num_disj_info_set,num_info_set):
+        lb += max(0,maximum_projected+1-k+list_of_ranks[m])
+    return maximum_projected
+
+
 def minimum_distance_zimmermann(C,maxiter=5):
 
     G1 = C.generator_matrix()
@@ -339,37 +351,38 @@ def minimum_distance_zimmermann(C,maxiter=5):
 
     lb = num_disj_info_set         
     print("Lower Bound: {} , Upper Bound: {}".format(lb,ub))
-    
-    # Ici je calcul le premier 'maximum projected"
-    maximum_projected = 0
-    lb_inter = 0 
-    while lb_inter < ub:
-      maximum_projected += 1
-      lb_inter = maximum_projected + 1 
-      for m in xrange(1,num_info_set):
-        lb_inter += max(0,maximum_projected+1-k+list_of_ranks[m])
+    maximum_projected = copy(maximum_projected_function(ub,list_of_ranks,num_info_set,num_disj_info_set))
     print("Maximum Projected w : {}".format(maximum_projected))
 
     if F == GF(2) :
       while w < maximum_projected and lb < ub :
-        for m in xrange(num_info_set) : # pour calculer G22 = L[m]
+        for m in xrange(num_info_set) : 
           A = L[m].row(0)
           for i in xrange(1,w):
             A += L[m].row(i)
-          if ub > A.hamming_weight():
-            ub = A.hamming_weight()
+          wt = A.hamming_weight()
+          if ub > wt:
+            ub = copy(wt)
             print("New upper bound : {}".format(ub))
             if ub <= lb :
               return ub
+            maximum_projected_inter = maximum_projected_function(ub,list_of_ranks,num_info_set,num_disj_info_set)
+            if maximum_projected_inter != maximum_projected:
+              maximum_projected = copy(maximum_projected_inter)  
+              print("New Maximum Projected w : {}".format(maximum_projected))    
 
           for i,j in combinations(k,w):
             A += L[m].row(i) + L[m].row(j)
-            if ub > A.hamming_weight():
-              ub = A.hamming_weight()
+            wt = A.hamming_weight()
+            if ub > wt:
+              ub = copy(wt)
               print("New upper bound : {}".format(ub))
               if ub <= lb :
                 return ub
-          
+              maximum_projected_inter = maximum_projected_function(ub,list_of_ranks,num_info_set,num_disj_info_set)
+              if maximum_projected_inter != maximum_projected:
+                maximum_projected = copy(maximum_projected_inter)
+                print("New Maximum Projected w : {}".format(maximum_projected))    
           if max(0,w+1-k+list_of_ranks[m]) != 0:
             lb += 1
         w += 1
@@ -383,7 +396,7 @@ def minimum_distance_zimmermann(C,maxiter=5):
        
     while w < maximum_projected and lb < ub :
       X = [F.zero()]*k
-      for m in xrange(num_info_set) : # pour calculer G22 = L[m]
+      for m in xrange(num_info_set) :
         A = L[m].row(0)
         for i in xrange(1,w):
           A += L[m].row(i)
@@ -414,7 +427,9 @@ def minimum_distance_zimmermann(C,maxiter=5):
               return ub
         if max(0,w+1-k+list_of_ranks[m]) != 0:
           lb += 1
+          # print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
       w += 1
+      #  Ce print peut etre qu'il faut l'effacer 
       print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
     return ub
 
@@ -508,6 +523,13 @@ def test_lent_gf2():
     print d
     print ("-------------------")
 
+# supprimer les rang qui sert a rien 
+# modifier brouwer pour qu'il affiche des res comme Zimmer
+# ajouter un parametre verbose 
+# afficher le lb a chaquer fois qu'on l incremente 
+# modifier la fct des informations et pour qu'il renvoie pas de rang 0
+# creer une seule fonction qui calcul la distance 
+# ameliorer la fonction qui nous permet d enumerer les mots de code 
 
 
 

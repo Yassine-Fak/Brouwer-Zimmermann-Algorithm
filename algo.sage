@@ -328,31 +328,40 @@ def minimum_distance_zimmermann(C,maxiter=5):
     G2, list_of_ranks = infomation_set_distance(G1,maxiter)
     num_info_set = len(list_of_ranks)
     L = list_of_system_gen_mat_zimm(G2,list_of_ranks)
-    lb = 1
+
     ub = n - k + 1
     w = 1
     print("Code Minimum Weight Zimmermann: length {}, dimension {}".format(n,k))
-    print("Lower Bound: {} , Upper Bound: {}".format(lb,ub))
+    # print("Lower Bound: {} , Upper Bound: {}".format(lb,ub))
     print("relative ranks used: {}".format(list_of_ranks))
+    num_disj_info_set = 0
+    for i in xrange(len(list_of_ranks)):
+      if list_of_ranks[i] == k:
+        num_disj_info_set += 1
+
+    lb = num_disj_info_set         
     if F == GF(2) :
       while w <= k and lb < ub :
-        lb_int = copy(lb)
-        lb = 0
         for m in xrange(num_info_set) : # pour calculer G22 = L[m]
           A = L[m].row(0)
           for i in xrange(1,w):
             A += L[m].row(i)
           ub = min(ub, A.hamming_weight())
-          if ub <= lb_int :
+          if ub <= lb :
             return ub
 
           for i,j in combinations(k,w):
             A += L[m].row(i) + L[m].row(j)
             ub = min(ub, A.hamming_weight())
-            if ub <= lb_int :
+            if ub <= lb :
               return ub
-          lb += max(0,w+1-k+list_of_ranks[m])
-          lb_int = copy(lb)  
+          if m < num_disj_info_set:
+            lb += 1
+          else :
+            if max(0,w+1-k+list_of_ranks[m]) == 0:
+              lb +=0
+            else :
+              lb += 1
         w += 1
         print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
       return ub
@@ -364,8 +373,6 @@ def minimum_distance_zimmermann(C,maxiter=5):
        
     while w <= k and lb < ub :
       X = [F.zero()]*k
-      lb_int = copy(lb)
-      lb = 0
       for m in xrange(num_info_set) : # pour calculer G22 = L[m]
         A = L[m].row(0)
         for i in xrange(1,w):
@@ -384,7 +391,7 @@ def minimum_distance_zimmermann(C,maxiter=5):
             A += (M[a[i]] - M[a_anc[i]])*L[m].row(w-1-i)
 
           ub = min(ub, A.hamming_weight())
-          if ub <= lb_int :
+          if ub <= lb :
             return ub
           
           A_int = copy(A) 
@@ -393,10 +400,15 @@ def minimum_distance_zimmermann(C,maxiter=5):
             X[i] = F.zero()
             A_int += X[j]*(L[m].row(j) - L[m].row(i))
             ub = min(ub, A_int.hamming_weight())
-            if ub <= lb_int :
+            if ub <= lb :
               return ub
-        lb += max(0,w+1-k+list_of_ranks[m])
-        lb_int = copy(lb)  
+        if m < num_disj_info_set:
+          lb += 1
+        else :
+          if max(0,w+1-k+list_of_ranks[m]) == 0:
+            lb += 0
+          else :
+            lb += 1
       w += 1
       print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
     return ub
@@ -437,7 +449,7 @@ def test_rapide_gf2():
     print a
     print (" ")
     print("minimum_distance_brouwer(C) :")
-    b = %time minimum_distance_brouwer(C)
+    b = %time minimum_distance_brouwer(C,nb_words=1)
     print b
     print (" ")
     print("minimum_distance_zimmermann(C) :")

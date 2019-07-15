@@ -381,123 +381,6 @@ def minimum_distance_zimmermann(C,maxiter=5,verbose=True):
 
     if F == GF(2) :
       while w < maximum_projected and lb < ub :
-        for m in xrange(num_info_set) : 
-          A = L[m].row(0)
-          for i in xrange(1,w):
-            A += L[m].row(i)
-          wt = A.hamming_weight()
-          if ub > wt:
-            ub = copy(wt)
-            if verbose == True:
-              print("New upper bound : {}".format(ub))
-            if ub <= lb :
-              return ub
-            maximum_projected_inter = maximum_projected_function(ub,list_of_ranks,num_info_set,num_disj_info_set)
-            if maximum_projected_inter != maximum_projected:
-              maximum_projected = copy(maximum_projected_inter)
-              if verbose == True:
-                print("New Maximum Projected w : {}".format(maximum_projected))
-              list_of_ranks_inter, num_info_set_inter = delet_non_contibuting_matrix(list_of_ranks,num_info_set,num_disj_info_set,maximum_projected,verbose)
-              if num_info_set_inter != num_info_set:
-                list_of_ranks = copy(list_of_ranks_inter)
-                num_info_set = copy(num_info_set_inter)    
-
-          for i,j in combinations(k,w):
-            A += L[m].row(i) + L[m].row(j)
-            wt = A.hamming_weight()
-            if ub > wt:
-              ub = copy(wt)
-              if verbose == True:
-                print("New upper bound : {}".format(ub))
-              if ub <= lb :
-                return ub
-              maximum_projected_inter = maximum_projected_function(ub,list_of_ranks,num_info_set,num_disj_info_set)
-              if maximum_projected_inter != maximum_projected:
-                maximum_projected = copy(maximum_projected_inter)
-                if verbose == True:
-                  print("New Maximum Projected w : {}".format(maximum_projected))   
-                list_of_ranks_inter, num_info_set_inter = delet_non_contibuting_matrix(list_of_ranks,num_info_set,num_disj_info_set,maximum_projected,verbose) 
-                if num_info_set_inter != num_info_set:
-                  list_of_ranks = copy(list_of_ranks_inter)
-                  # num_info_set = copy(num_info_set_inter)
-                  num_info_set = len(list_of_ranks)
-          print("m = {} et list_of_ranks[m] = {}".format(m,list_of_ranks[m]))
-          if max(0,w+1-k+list_of_ranks[m]) != 0:
-            lb += 1
-            # if verbose == True:
-              # print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
-        w += 1
-      return ub
-    
-    q = F.cardinality()
-    g = F.multiplicative_generator()
-    M = [g^i for i in xrange(q-1)]
-    Z = IntegerRing()
-       
-    while w < maximum_projected and lb < ub :
-      X = [F.zero()]*k
-      for m in xrange(num_info_set) :
-        A = L[m].row(0)
-        for i in xrange(1,w):
-          A += L[m].row(i)
-        a = [0]*w
-        for v in xrange((q-1)^w):
-          a_anc = copy(a)
-          a = Z(v).digits(q-1,padto=w)
-          for i in xrange(w):
-            X[i] = M[a[w-1-i]]  
-          a_supp = []
-          for i in xrange(w):
-            if a[i] != a_anc[i]:
-              a_supp += [i]
-          for i in a_supp :
-            A += (M[a[i]] - M[a_anc[i]])*L[m].row(w-1-i)
-
-          ub = min(ub, A.hamming_weight())
-          if ub <= lb :
-            return ub
-          
-          A_int = copy(A) 
-          for i,j in combinations(k,w):
-            X[j] = X[i]
-            X[i] = F.zero()
-            A_int += X[j]*(L[m].row(j) - L[m].row(i))
-            ub = min(ub, A_int.hamming_weight())
-            if ub <= lb :
-              return ub
-        if max(0,w+1-k+list_of_ranks[m]) != 0:
-          lb += 1
-          print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
-      w += 1
-    return ub
-
-
-
-
-def minimum_distance_zimmermann_nv(C,maxiter=5,verbose=True):
-
-    G1 = C.generator_matrix()
-    n,k = C.length(), C.dimension()
-    F = C.base_field()
-    G2, list_of_ranks = infomation_set_distance(G1,maxiter)
-    num_info_set = len(list_of_ranks)
-    L = list_of_system_gen_mat_zimm(G2,list_of_ranks)
-    ub = n - k + 1
-    w = 1
-    print("Code Minimum Weight Zimmermann: length {}, dimension {}".format(n,k))
-    print("relative ranks used: {}".format(list_of_ranks))
-    num_disj_info_set = 0
-    for i in xrange(len(list_of_ranks)):
-      if list_of_ranks[i] == k:
-        num_disj_info_set += 1
-
-    lb = num_disj_info_set         
-    print("Lower Bound: {} , Upper Bound: {}".format(lb,ub))
-    maximum_projected = copy(maximum_projected_function(ub,list_of_ranks,num_info_set,num_disj_info_set))
-    print("Maximum Projected w : {}".format(maximum_projected))
-
-    if F == GF(2) :
-      while w < maximum_projected and lb < ub :
         m = 0
         while m < num_info_set:
           A = L[m].row(0)
@@ -513,11 +396,10 @@ def minimum_distance_zimmermann_nv(C,maxiter=5,verbose=True):
             maximum_projected_inter = maximum_projected_function(ub,list_of_ranks,num_info_set,num_disj_info_set)
             if maximum_projected_inter != maximum_projected:
               maximum_projected = copy(maximum_projected_inter)
-              if verbose == True:
-                print("New Maximum Projected w : {}".format(maximum_projected))
-              print("num_info_set = {}".format(num_info_set))
+              if verbose == True :
+                if w != maximum_projected :
+                  print("New Maximum Projected w : {}".format(maximum_projected))
               list_of_ranks, num_info_set = delet_non_contibuting_matrix(list_of_ranks,num_info_set,num_disj_info_set,maximum_projected,verbose)
-              print("num_info_set = {}".format(num_info_set))
           for i,j in combinations(k,w):
             A += L[m].row(i) + L[m].row(j)
             wt = A.hamming_weight()
@@ -531,15 +413,13 @@ def minimum_distance_zimmermann_nv(C,maxiter=5,verbose=True):
               if maximum_projected_inter != maximum_projected:
                 maximum_projected = copy(maximum_projected_inter)
                 if verbose == True:
-                  print("New Maximum Projected w : {}".format(maximum_projected))   
-                print("num_info_set = {}".format(num_info_set))
+                  if w != maximum_projected :
+                    print("New Maximum Projected w : {}".format(maximum_projected))   
                 list_of_ranks, num_info_set = delet_non_contibuting_matrix(list_of_ranks,num_info_set,num_disj_info_set,maximum_projected,verbose)
-                print("num_info_set = {}".format(num_info_set)) 
-          print("m = {} et list_of_ranks[m] = {}".format(m,list_of_ranks[m]))
           if max(0,w+1-k+list_of_ranks[m]) != 0:
             lb += 1
-            # if verbose == True:
-              # print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
+            if verbose == True:
+              print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
           m += 1
         w += 1
       return ub

@@ -245,7 +245,7 @@ def list_of_system_gen_mat_zimm(M,list_of_ranks):
     return L
 
 
-def minimum_distance_brouwer(C, nb_words=900000, maxiter=5):
+def minimum_distance_brouwer(C, nb_words=900000, maxiter=5,verbose=True):
 
     n,k = C.length(), C.dimension()
     F = C.base_field()
@@ -263,24 +263,35 @@ def minimum_distance_brouwer(C, nb_words=900000, maxiter=5):
       L += [A.inverse()*G2]
     lb = num_info_set
     ub = n - k + 1
+    print("Code Minimum Weight Brouwer: length {}, dimension {}".format(n,k))
     print("The number of disjoint information set is : {} ".format(num_info_set))
-    
+    print("Lower Bound: {} , Upper Bound: {}".format(lb,ub))
+
     if F == GF(2) :
       while w <= k and lb < ub :
         for m in xrange(0,num_info_set) : 
           A = L[m].row(0)
           for i in xrange(1,w):
             A += L[m].row(i)
-          ub = min(ub, A.hamming_weight())
-          if ub <= lb :
-            return ub
-
-          for i,j in combinations(k,w):
-            A += L[m].row(i) + L[m].row(j)
-            ub = min(ub, A.hamming_weight())
+          wt = A.hamming_weight()
+          if ub > wt:
+            ub = copy(wt)
+            if verbose == True:
+              print("New upper bound : {}".format(ub))
             if ub <= lb :
               return ub
+          for i,j in combinations(k,w):
+            A += L[m].row(i) + L[m].row(j)
+            wt = A.hamming_weight()
+            if ub > wt:
+              ub = copy(wt)
+              if verbose == True:
+                print("New upper bound : {}".format(ub))
+              if ub <= lb : # peut etre que cette condition doit etre dehors i.e une tabulation en moins
+                return ub
           lb += 1
+          if verbose == True:
+            print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
         w += 1
       return ub
     
@@ -309,19 +320,29 @@ def minimum_distance_brouwer(C, nb_words=900000, maxiter=5):
           for i in a_supp :
             A += (M[a[i]] - M[a_anc[i]])*L[m].row(w-1-i)
 
-          ub = min(ub, A.hamming_weight())
-          if ub <= lb :
-            return ub
-          
+          wt = A.hamming_weight()
+          if ub > wt:
+            ub = copy(wt)
+            if verbose == True:
+              print("New upper bound : {}".format(ub))
+            if ub <= lb :
+              return ub
+
           A_int = copy(A) 
           for i,j in combinations(k,w):
             X[j] = X[i]
             X[i] = F.zero()
             A_int += X[j]*(L[m].row(j) - L[m].row(i))
-            ub = min(ub, A_int.hamming_weight())
-            if ub <= lb :
-              return ub
+            wt = A_int.hamming_weight()
+            if ub > wt:
+              ub = copy(wt)
+              if verbose == True:
+                print("New upper bound : {}".format(ub))
+              if ub <= lb :
+                return ub
         lb += 1
+        if verbose == True:
+          print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
       w += 1
     return ub
 
@@ -394,12 +415,13 @@ def minimum_distance_zimmermann(C,maxiter=5,verbose=True):
             if ub <= lb :
               return ub
             maximum_projected_inter = maximum_projected_function(ub,list_of_ranks,num_info_set,num_disj_info_set)
-            if maximum_projected_inter != maximum_projected:
+            if maximum_projected_inter != maximum_projected and maximum_projected_inter > 1:
               maximum_projected = copy(maximum_projected_inter)
               if verbose == True :
                 if w != maximum_projected :
                   print("New Maximum Projected w : {}".format(maximum_projected))
-              list_of_ranks, num_info_set = delet_non_contibuting_matrix(list_of_ranks,num_info_set,num_disj_info_set,maximum_projected,verbose)
+              if num_info_set != num_disj_info_set:
+                list_of_ranks, num_info_set = delet_non_contibuting_matrix(list_of_ranks,num_info_set,num_disj_info_set,maximum_projected,verbose)
           for i,j in combinations(k,w):
             A += L[m].row(i) + L[m].row(j)
             wt = A.hamming_weight()
@@ -410,12 +432,13 @@ def minimum_distance_zimmermann(C,maxiter=5,verbose=True):
               if ub <= lb :
                 return ub
               maximum_projected_inter = maximum_projected_function(ub,list_of_ranks,num_info_set,num_disj_info_set)
-              if maximum_projected_inter != maximum_projected:
+              if maximum_projected_inter != maximum_projected and maximum_projected_inter > 1:
                 maximum_projected = copy(maximum_projected_inter)
                 if verbose == True:
                   if w != maximum_projected :
-                    print("New Maximum Projected w : {}".format(maximum_projected))   
-                list_of_ranks, num_info_set = delet_non_contibuting_matrix(list_of_ranks,num_info_set,num_disj_info_set,maximum_projected,verbose)
+                    print("New Maximum Projected w : {}".format(maximum_projected))
+                if num_info_set != num_disj_info_set:
+                  list_of_ranks, num_info_set = delet_non_contibuting_matrix(list_of_ranks,num_info_set,num_disj_info_set,maximum_projected,verbose)
           if max(0,w+1-k+list_of_ranks[m]) != 0:
             lb += 1
             if verbose == True:
@@ -431,7 +454,8 @@ def minimum_distance_zimmermann(C,maxiter=5,verbose=True):
        
     while w < maximum_projected and lb < ub :
       X = [F.zero()]*k
-      for m in xrange(num_info_set) :
+      m = 0
+      while m < num_info_set:
         A = L[m].row(0)
         for i in xrange(1,w):
           A += L[m].row(i)
@@ -448,25 +472,49 @@ def minimum_distance_zimmermann(C,maxiter=5,verbose=True):
           for i in a_supp :
             A += (M[a[i]] - M[a_anc[i]])*L[m].row(w-1-i)
 
-          ub = min(ub, A.hamming_weight())
-          if ub <= lb :
-            return ub
-          
+          wt = A.hamming_weight()
+          if ub > wt:
+            ub = copy(wt)
+            if verbose == True:
+              print("New upper bound : {}".format(ub))
+            if ub <= lb :
+              return ub
+            maximum_projected_inter = maximum_projected_function(ub,list_of_ranks,num_info_set,num_disj_info_set)
+            if maximum_projected_inter != maximum_projected and maximum_projected_inter > 1:
+              maximum_projected = copy(maximum_projected_inter)
+              if verbose == True :
+                if w != maximum_projected :
+                  print("New Maximum Projected w : {}".format(maximum_projected))
+              if num_info_set != num_disj_info_set:
+                list_of_ranks, num_info_set = delet_non_contibuting_matrix(list_of_ranks,num_info_set,num_disj_info_set,maximum_projected,verbose)
+
           A_int = copy(A) 
           for i,j in combinations(k,w):
             X[j] = X[i]
             X[i] = F.zero()
             A_int += X[j]*(L[m].row(j) - L[m].row(i))
-            ub = min(ub, A_int.hamming_weight())
-            if ub <= lb :
-              return ub
+            wt = A_int.hamming_weight()
+            if ub > wt:
+              ub = copy(wt)
+              if verbose == True:
+                print("New upper bound : {}".format(ub))
+              if ub <= lb :
+                return ub
+              maximum_projected_inter = maximum_projected_function(ub,list_of_ranks,num_info_set,num_disj_info_set)
+              if maximum_projected_inter != maximum_projected and maximum_projected_inter > 1:
+                maximum_projected = copy(maximum_projected_inter)
+                if verbose == True:
+                  if w != maximum_projected :
+                    print("New Maximum Projected w : {}".format(maximum_projected))
+                if num_info_set != num_disj_info_set:
+                  list_of_ranks, num_info_set = delet_non_contibuting_matrix(list_of_ranks,num_info_set,num_disj_info_set,maximum_projected,verbose)
         if max(0,w+1-k+list_of_ranks[m]) != 0:
           lb += 1
-          print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
+          if verbose == True:
+            print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
+        m += 1
       w += 1
     return ub
-
-
 
 
 def test_rapide(): 
@@ -481,13 +529,13 @@ def test_rapide():
     a = %time C.minimum_distance()
     print a
     print (" ")
-    # print("minimum_distance_brouwer(C) :")
-    # b = %time minimum_distance_brouwer(C)
-    # print b
+    print("minimum_distance_brouwer(C) :")
+    b = %time minimum_distance_brouwer(C)
+    print b
     # print (" ")
-    print("minimum_distance_zimmermann(C) :")
-    e = %time minimum_distance_zimmermann(C)
-    print e
+    # print("minimum_distance_zimmermann(C) :")
+    # e = %time minimum_distance_zimmermann(C)
+    # print e
     print ("-------------------")
 
 
@@ -503,13 +551,13 @@ def test_rapide_gf2():
     a = %time C.minimum_distance()
     print a
     print (" ")
-    # print("minimum_distance_brouwer(C) :")
-    # b = %time minimum_distance_brouwer(C,nb_words=1)
-    # print b
+    print("minimum_distance_brouwer(C) :")
+    b = %time minimum_distance_brouwer(C,nb_words=1)
+    print b
     # print (" ")
-    print("minimum_distance_zimmermann(C) :")
-    d = %time minimum_distance_zimmermann(C)
-    print d
+    # print("minimum_distance_zimmermann(C) :")
+    # d = %time minimum_distance_zimmermann(C)
+    # print d
     print ("-------------------")
 
 
@@ -557,15 +605,19 @@ def test_lent_gf2():
     print ("-------------------")
 
 
-# supprimer les rang qui sert a rien : 
 
+# tt d'abord je dois commencer par ajouter des return dans Brouwer et peut etre dqn Zimmer 
+# Est ce qu il faut calculer le maximum_projected pour Brouwer aussi
 # modifier brouwer pour qu'il affiche des res comme Zimmer
+# creer une seule fonction qui calcul la distance 
+# ameliorer la fonction qui nous permet d enumerer les mots de code 
+# test pour tver le meilleur maxiter
+
+
+# supprimer les rang qui sert a rien : fait 
 # ajouter un parametre verbose : fait
 # afficher le lb a chaquer fois qu'on l incremente : fait
 # modifier la fct des informations et pour qu'il renvoie pas de rang 0 : fait
 
-# creer une seule fonction qui calcul la distance 
-# ameliorer la fonction qui nous permet d enumerer les mots de code 
 
-
-
+# C = codes.random_linear_code(GF(5),54,4)

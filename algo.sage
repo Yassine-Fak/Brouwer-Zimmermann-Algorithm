@@ -165,11 +165,11 @@ def infomation_set_distance(G,maxiter, method = "zimmermann"):
 
 
 def maximum_projected_function_brouwer(ub,num_info_set):
-    maximum_projected = 1
+    maximum_projected = 0
     lb = 1
     while lb < ub:
-      lb = num_info_set*(maximum_projected+1)
       maximum_projected += 1
+      lb = num_info_set*(maximum_projected+1)
     return maximum_projected
 
 
@@ -328,7 +328,7 @@ def minimum_distance_brouwer(C, nb_words=900000, maxiter=5,verbose=True):
     print("Maximum Projected w : {}".format(maximum_projected))
 
     if F == GF(2) :
-      while w <= k and lb < ub :
+      while lb < ub :
         for m in xrange(0,num_info_set) : 
           A = L[m].row(0)
           for i in xrange(1,w):
@@ -344,8 +344,7 @@ def minimum_distance_brouwer(C, nb_words=900000, maxiter=5,verbose=True):
             if maximum_projected_inter != maximum_projected :
               maximum_projected = copy(maximum_projected_inter)
               if verbose == True :
-                if w != maximum_projected :
-                  print("New Maximum Projected w : {}".format(maximum_projected))
+                print("New Maximum Projected w : {}".format(maximum_projected))
           for i,j in combinations(k,w):
             A += L[m].row(i) + L[m].row(j)
             wt = A.hamming_weight()
@@ -359,8 +358,7 @@ def minimum_distance_brouwer(C, nb_words=900000, maxiter=5,verbose=True):
               if maximum_projected_inter != maximum_projected :
                 maximum_projected = copy(maximum_projected_inter)
                 if verbose == True :
-                  if w != maximum_projected :
-                    print("New Maximum Projected w : {}".format(maximum_projected))
+                  print("New Maximum Projected w : {}".format(maximum_projected))
           lb += 1
           if verbose == True:
             print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
@@ -374,7 +372,7 @@ def minimum_distance_brouwer(C, nb_words=900000, maxiter=5,verbose=True):
     M = [g^i for i in xrange(q-1)]
     Z = IntegerRing()
 
-    while w <= k and lb < ub :
+    while lb < ub :
       X = [F.zero()]*k
       for m in xrange(num_info_set) : 
         A = L[m].row(0)
@@ -405,8 +403,7 @@ def minimum_distance_brouwer(C, nb_words=900000, maxiter=5,verbose=True):
             if maximum_projected_inter != maximum_projected :
               maximum_projected = copy(maximum_projected_inter)
               if verbose == True :
-                if w != maximum_projected :
-                  print("New Maximum Projected w : {}".format(maximum_projected))
+                print("New Maximum Projected w : {}".format(maximum_projected))
 
           A_int = copy(A) 
           for i,j in combinations(k,w):
@@ -424,8 +421,7 @@ def minimum_distance_brouwer(C, nb_words=900000, maxiter=5,verbose=True):
               if maximum_projected_inter != maximum_projected :
                 maximum_projected = copy(maximum_projected_inter)
                 if verbose == True :
-                  if w != maximum_projected :
-                    print("New Maximum Projected w : {}".format(maximum_projected))
+                  print("New Maximum Projected w : {}".format(maximum_projected))
         lb += 1
         if verbose == True:
           print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
@@ -458,7 +454,7 @@ def minimum_distance_zimmermann(C,maxiter=5,verbose=True):
     print("Maximum Projected w : {}".format(maximum_projected))
 
     if F == GF(2) :
-      while w <= k and lb < ub :
+      while lb < ub :
         m = 0
         while m < num_info_set:
           A = L[m].row(0)
@@ -475,8 +471,7 @@ def minimum_distance_zimmermann(C,maxiter=5,verbose=True):
             if maximum_projected_inter != maximum_projected and maximum_projected_inter > 1:
               maximum_projected = copy(maximum_projected_inter)
               if verbose == True :
-                if w != maximum_projected :
-                  print("New Maximum Projected w : {}".format(maximum_projected))
+                print("New Maximum Projected w : {}".format(maximum_projected))
               if num_info_set != num_disj_info_set:
                 list_of_ranks, num_info_set = delet_non_contibuting_matrix(list_of_ranks,num_info_set,num_disj_info_set,maximum_projected,verbose)
           for i,j in combinations(k,w):
@@ -492,8 +487,7 @@ def minimum_distance_zimmermann(C,maxiter=5,verbose=True):
               if maximum_projected_inter != maximum_projected and maximum_projected_inter > 1:
                 maximum_projected = copy(maximum_projected_inter)
                 if verbose == True:
-                  if w != maximum_projected :
-                    print("New Maximum Projected w : {}".format(maximum_projected))
+                  print("New Maximum Projected w : {}".format(maximum_projected))
                 if num_info_set != num_disj_info_set:
                   list_of_ranks, num_info_set = delet_non_contibuting_matrix(list_of_ranks,num_info_set,num_disj_info_set,maximum_projected,verbose)
           if max(0,w+1-k+list_of_ranks[m]) != 0:
@@ -511,7 +505,7 @@ def minimum_distance_zimmermann(C,maxiter=5,verbose=True):
     M = [g^i for i in xrange(q-1)]
     Z = IntegerRing()
        
-    while w <= k and lb < ub :
+    while lb < ub :
       X = [F.zero()]*k
       m = 0
       while m < num_info_set:
@@ -542,8 +536,7 @@ def minimum_distance_zimmermann(C,maxiter=5,verbose=True):
             if maximum_projected_inter != maximum_projected and maximum_projected_inter > 1:
               maximum_projected = copy(maximum_projected_inter)
               if verbose == True :
-                if w != maximum_projected :
-                  print("New Maximum Projected w : {}".format(maximum_projected))
+                print("New Maximum Projected w : {}".format(maximum_projected))
               if num_info_set != num_disj_info_set:
                 list_of_ranks, num_info_set = delet_non_contibuting_matrix(list_of_ranks,num_info_set,num_disj_info_set,maximum_projected,verbose)
 
@@ -563,8 +556,7 @@ def minimum_distance_zimmermann(C,maxiter=5,verbose=True):
               if maximum_projected_inter != maximum_projected and maximum_projected_inter > 1:
                 maximum_projected = copy(maximum_projected_inter)
                 if verbose == True:
-                  if w != maximum_projected :
-                    print("New Maximum Projected w : {}".format(maximum_projected))
+                  print("New Maximum Projected w : {}".format(maximum_projected))
                 if num_info_set != num_disj_info_set:
                   list_of_ranks, num_info_set = delet_non_contibuting_matrix(list_of_ranks,num_info_set,num_disj_info_set,maximum_projected,verbose)
         if max(0,w+1-k+list_of_ranks[m]) != 0:
@@ -615,10 +607,10 @@ def test_rapide_gf2():
     print("minimum_distance_brouwer(C) :")
     b = %time minimum_distance_brouwer(C,nb_words=1)
     print b
-    # print (" ")
-    # print("minimum_distance_zimmermann(C) :")
-    # d = %time minimum_distance_zimmermann(C)
-    # print d
+    print (" ")
+    print("minimum_distance_zimmermann(C) :")
+    d = %time minimum_distance_zimmermann(C)
+    print d
     print ("-------------------")
 
 

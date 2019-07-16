@@ -45,6 +45,24 @@ def infomation_set(G):
     return (M,num_info_set)
 
 
+def test_permutation(k,x,maxiter):
+    a = randrange(k)
+    b = randrange(k)
+    c = randrange(k)
+    for i in xrange(1,11):
+      # C = codes.random_linear_code(GF(5),x*k+a,k)
+      # C = codes.random_linear_code(GF(5),x*k+a+b,k)
+      C = codes.random_linear_code(GF(5),x*k+a+b+c,k)
+      G = C.generator_matrix()
+      M,list_of_ranks = infomation_set_distance(G,maxiter)
+      num_info_set = len(list_of_ranks)
+      num_disj_info_set = 0
+      for i in xrange(len(list_of_ranks)):
+        if list_of_ranks[i] == k:
+          num_disj_info_set += 1
+      print("x is : {} , the number of Dis. IS is : {} and the of overlapping IS is : {}".format(x,num_disj_info_set,num_info_set-num_disj_info_set))
+
+
 def infomation_set_distance(G,maxiter, method = "zimmermann"):
   
     k = G.nrows()
@@ -310,7 +328,7 @@ def minimum_distance_brouwer(C, nb_words=900000, maxiter=5,verbose=True):
     print("Maximum Projected w : {}".format(maximum_projected))
 
     if F == GF(2) :
-      while w < maximum_projected and lb < ub :
+      while w <= k and lb < ub :
         for m in xrange(0,num_info_set) : 
           A = L[m].row(0)
           for i in xrange(1,w):
@@ -356,7 +374,7 @@ def minimum_distance_brouwer(C, nb_words=900000, maxiter=5,verbose=True):
     M = [g^i for i in xrange(q-1)]
     Z = IntegerRing()
 
-    while w < maximum_projected and lb < ub :
+    while w <= k and lb < ub :
       X = [F.zero()]*k
       for m in xrange(num_info_set) : 
         A = L[m].row(0)
@@ -440,7 +458,7 @@ def minimum_distance_zimmermann(C,maxiter=5,verbose=True):
     print("Maximum Projected w : {}".format(maximum_projected))
 
     if F == GF(2) :
-      while w < maximum_projected and lb < ub :
+      while w <= k and lb < ub :
         m = 0
         while m < num_info_set:
           A = L[m].row(0)
@@ -493,7 +511,7 @@ def minimum_distance_zimmermann(C,maxiter=5,verbose=True):
     M = [g^i for i in xrange(q-1)]
     Z = IntegerRing()
        
-    while w < maximum_projected and lb < ub :
+    while w <= k and lb < ub :
       X = [F.zero()]*k
       m = 0
       while m < num_info_set:
@@ -649,13 +667,14 @@ def test_lent_gf2():
 
 
 
-# tt d'abord je dois commencer par ajouter des return dans Brouwer et peut etre dqn Zimmer 
+
 # creer une seule fonction qui calcul la distance 
 # ameliorer la fonction qui nous permet d enumerer les mots de code 
 # test pour tver le meilleur maxiter
 
-# # calculer le maximum_projected pour Brouwer aussi : fait 
-# # modifier brouwer pour qu'il affiche des res comme Zimmer : fait
+# tt d'abord je dois commencer par ajouter des return dans Brouwer et peut etre ds Zimmer : fait 
+# calculer le maximum_projected pour Brouwer aussi : fait 
+# modifier brouwer pour qu'il affiche des res comme Zimmer : fait
 # supprimer les rang qui sert a rien : fait 
 # ajouter un parametre verbose : fait
 # afficher le lb a chaquer fois qu'on l incremente : fait
@@ -663,3 +682,7 @@ def test_lent_gf2():
 
 
 # C = codes.random_linear_code(GF(5),54,4)
+
+# Questions :
+# est ce qu'il faut garder uniquement info. set Zimmer et si disj = num is alors on fait appel a brouwer et sinon zimmerman ?
+# Qd qu'il faut appeler one_info_set ?

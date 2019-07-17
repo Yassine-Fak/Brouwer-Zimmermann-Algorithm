@@ -31,7 +31,7 @@ def infomation_set(G):
       a = L.pivots()
       b = range(0,num_info_set*k) + [num_info_set*k + i for i in a]
       c = copy(b)
-      for i in range(n):
+      for i in xrange(n):
         if i in b:
           pass
         else:
@@ -44,23 +44,69 @@ def infomation_set(G):
 
     return (M,num_info_set)
 
+# C = codes.random_linear_code(GF(2),99,33)
+def nb_permut_for_disjoint_infor_set(G,maxiter=1000000):
+    k = G.nrows()
+    n = G.ncols()
+    M, num_info_set = infomation_set(G)
+    q = n//k
+    i = 1
+    nb_permut = 0
+    while i <= maxiter and num_info_set != q :
+      nb_permut += 1
+      M_inter = copy(G)
+      p = Permutations(n).random_element()
+      M_inter.permute_columns(p)
+      M_inter, num_info_set_inter = infomation_set(M_inter)
+      if num_info_set_inter > num_info_set :
+        M = copy(M_inter)
+        num_info_set = num_info_set_inter
+      i += 1
+    return (num_info_set,nb_permut)
 
-def test_permutation(k,x,maxiter):
-    a = randrange(k)
-    b = randrange(k)
-    c = randrange(k)
-    for i in xrange(1,11):
-      # C = codes.random_linear_code(GF(5),x*k+a,k)
-      # C = codes.random_linear_code(GF(5),x*k+a+b,k)
-      C = codes.random_linear_code(GF(5),x*k+a+b+c,k)
-      G = C.generator_matrix()
-      M,list_of_ranks = infomation_set_distance(G,maxiter)
-      num_info_set = len(list_of_ranks)
-      num_disj_info_set = 0
-      for i in xrange(len(list_of_ranks)):
-        if list_of_ranks[i] == k:
-          num_disj_info_set += 1
-      print("x is : {} , the number of Dis. IS is : {} and the of overlapping IS is : {}".format(x,num_disj_info_set,num_info_set-num_disj_info_set))
+def best_permutation(C,nb_iter=1000):
+
+    G = C.generator_matrix()
+    list_of_nb_of_permu = []
+    L = []
+    f = open('result_permutation', 'w')
+
+    for i in xrange(nb_iter):
+      num_info_set,nb_permut = nb_permut_for_disjoint_infor_set(G,maxiter=1000000)
+      list_of_nb_of_permu += [nb_permut]
+      f.write("iteration : {} , num_info_set : {} , nb_permut : {} \n ".format(i,num_info_set,nb_permut))
+    maximum_nb_of_permu = max(list_of_nb_of_permu)
+    X = range(maximum_nb_of_permu+1)
+
+    f.write("  \n")
+    f.write("(Le nb de permut pour atteindre le nb maxi d'is, le nombre de fois que ce nombre a été affiché) \n")
+    f.write("  \n")
+    
+    for i in X:
+      counter = 0
+      for x in list_of_nb_of_permu:
+        if x == i:
+          counter += 1
+      L += [(i,counter)]
+    f.write("{}".format(L))
+    Y = []
+    for i in X:
+      if i == 0:
+        Y += [0]
+      else:
+        Y += [ Y[i-1] + L[i][1] ]
+        
+    for i in X:
+      Y[i] = float(Y[i]/nb_iter) 
+    f.write("  \n")
+    f.write("X = {}".format(X))
+    f.write("  \n")
+    f.write("Y = {}".format(Y))
+    f.close()
+    # list_plot(Y,color='red')
+    G = list_plot(Y,plotjoined=True,color='red')
+    G.save("sage.png")
+    # G.show()
 
 
 def infomation_set_distance(G,maxiter, method = "zimmermann"):
@@ -577,17 +623,17 @@ def test_rapide():
   for x in L :
     C = codes.random_linear_code(GF(x[0]),x[1],x[2])
     print("For {} we have : ".format(C))
-    # print (" ")
-    # print("C.minimum_distance() : ")
-    # a = %time C.minimum_distance()
-    # print a
+    print (" ")
+    print("C.minimum_distance() : ")
+    a = %time C.minimum_distance()
+    print a
     print (" ")
     print("minimum_distance_brouwer(C) :")
     b = %time minimum_distance_brouwer(C)
     print b
     print (" ")
-    print("minimum_distance_brouwer_nv(C) :")
-    e = %time minimum_distance_brouwer_nv(C)
+    print("minimum_distance_zimmermann(C) :")
+    e = %time minimum_distance_zimmermann(C)
     print e
     print ("-------------------")
 
@@ -648,10 +694,10 @@ def test_lent_gf2():
     a = %time C.minimum_distance()
     print a
     print (" ")
-    # print("minimum_distance_brouwer(C) :")
-    # b = %time minimum_distance_brouwer(C)
-    # print b
-    # print (" ")
+    print("minimum_distance_brouwer(C) :")
+    b = %time minimum_distance_brouwer(C)
+    print b
+    print (" ")
     print("minimum_distance_zimmermann(C) :")
     d = %time minimum_distance_zimmermann(C)
     print d

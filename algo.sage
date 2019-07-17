@@ -51,7 +51,7 @@ def nb_permut_for_disjoint_infor_set(G,maxiter=1000000):
     M, num_info_set = infomation_set(G)
     q = n//k
     i = 1
-    nb_permut = 0
+    nb_permut = 1
     while i <= maxiter and num_info_set != q :
       nb_permut += 1
       M_inter = copy(G)
@@ -107,6 +107,7 @@ def best_permutation(C,nb_iter=1000):
     G = list_plot(Y,plotjoined=True,color='red')
     G.save("sage.png")
     # G.show()
+    return maximum_nb_of_permu
 
 
 def infomation_set_distance(G,maxiter, method = "zimmermann"):

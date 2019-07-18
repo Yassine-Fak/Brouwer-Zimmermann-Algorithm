@@ -350,7 +350,7 @@ def minimum_distance_one_information_set(C):
     return ub
 
 
-def minimum_distance_brouwer(C, nb_words=900000, maxiter=5,verbose=True):
+def minimum_distance_brouwer(C, nb_words=1, maxiter=5,verbose=True):
 
     n,k = C.length(), C.dimension()
     F = C.base_field()

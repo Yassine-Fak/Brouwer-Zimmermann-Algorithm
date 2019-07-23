@@ -45,114 +45,81 @@ def infomation_set(G):
     return (M,num_info_set)
 
 
-def percentage_disjoint_infor_set(G,percentage,maxiter=1000000):
+def percentage_disjoint_infor_set(G,maxiter=1000000):
     k = G.nrows()
     n = G.ncols()
     M, num_info_set = infomation_set(G)
     q = n//k
-    x = int((80*n//k)/100)
-    y = int((90*n//k)/100)
     i = 1
-    nb_permut = 1
+    nb_permut = 1    
 
-    if percentage == 80 : 
-      while i <= maxiter and num_info_set != x :
-        nb_permut += 1
-        M_inter = copy(G)
-        p = Permutations(n).random_element()
-        M_inter.permute_columns(p)
-        M_inter, num_info_set_inter = infomation_set(M_inter)
-        if num_info_set_inter == x :
-          M = copy(M_inter)
-          num_info_set = num_info_set_inter
-        i += 1
-      return (num_info_set,nb_permut)
-    
-    if percentage == 90 : 
-      while i <= maxiter and num_info_set != y :
-        nb_permut += 1
-        M_inter = copy(G)
-        p = Permutations(n).random_element()
-        M_inter.permute_columns(p)
-        M_inter, num_info_set_inter = infomation_set(M_inter)
-        if num_info_set_inter == y :
-          M = copy(M_inter)
-          num_info_set = num_info_set_inter
-        i += 1
-      return (num_info_set,nb_permut)
-    
-    if percentage == 100:
-      while i <= maxiter and num_info_set != q :
-        nb_permut += 1
-        M_inter = copy(G)
-        p = Permutations(n).random_element()
-        M_inter.permute_columns(p)
-        M_inter, num_info_set_inter = infomation_set(M_inter)
-        if num_info_set_inter > num_info_set :
-          M = copy(M_inter)
-          num_info_set = num_info_set_inter
-        i += 1
-      return (num_info_set,nb_permut)
+    while i <= maxiter and num_info_set != q :
+      nb_permut += 1
+      M_inter = copy(G)
+      p = Permutations(n).random_element()
+      M_inter.permute_columns(p)
+      M_inter, num_info_set_inter = infomation_set(M_inter)
+      if num_info_set_inter > num_info_set :
+        M = copy(M_inter)
+        num_info_set = num_info_set_inter
+      i += 1
+    return (num_info_set,nb_permut)
 
-def best_permutation(C,percentage,nb_iter=1000):
+
+def best_permutation(C,nb_iter=1000):
 
     G = C.generator_matrix()
     list_of_nb_of_permu = []
+    L = []
+    f = open('result_permutation', 'w')
+    for i in xrange(nb_iter):
+      num_info_set,nb_permut = percentage_disjoint_infor_set(G,maxiter=1000000)
+      list_of_nb_of_permu += [nb_permut]
+      f.write("iteration : {} , num_info_set : {} , nb_permut : {} \n ".format(i,num_info_set,nb_permut))
+    maximum_nb_of_permu = max(list_of_nb_of_permu)
+    X = range(maximum_nb_of_permu+1)
 
-    if percentage == 80:
-      for i in xrange(nb_iter):
-        num_info_set,nb_permut = percentage_disjoint_infor_set(G,80,maxiter=1000000)
-        list_of_nb_of_permu += [nb_permut]
-      maximum_nb_of_permu = max(list_of_nb_of_permu)
-      return maximum_nb_of_permu
+    f.write("  \n")
+    f.write("(Le nb de permut pour atteindre le nb maxi d'is, le nombre de fois que ce nombre a été affiché) \n")
+    f.write("  \n")
 
-    if percentage == 90:
-      for i in xrange(nb_iter):
-        num_info_set,nb_permut = percentage_disjoint_infor_set(G,90,maxiter=1000000)
-        list_of_nb_of_permu += [nb_permut]
-      maximum_nb_of_permu = max(list_of_nb_of_permu)
-      return maximum_nb_of_permu
+    for i in X:
+      counter = 0
+      for x in list_of_nb_of_permu:
+        if x == i:
+          counter += 1
+      L += [(i,counter)]
+    f.write("{}".format(L))
+    Y = []
+    for i in X:
+      if i == 0:
+        Y += [0]
+      else:
+        Y += [ Y[i-1] + L[i][1] ]
+        
+    for i in X:
+      Y[i] = float(Y[i]/nb_iter) 
+    f.write("  \n")
+    f.write("X = {}".format(X))
+    f.write("  \n")
+    f.write("Y = {}".format(Y))
+    f.close()
+    # list_plot(Y,color='red')
+    G = list_plot(Y,plotjoined=True,color='red')
+    G.save("sage.png")
+    # G.show()
+    x = 1
+    y = 1
+    for i in xrange(len(Y)):
+      if Y[i] >= 0.8 and Y[i] < 0.9:
+        x = X[i]
+        break 
 
-    if percentage == 100:
-      L = []
-      f = open('result_permutation', 'w')
-      for i in xrange(nb_iter):
-        num_info_set,nb_permut = percentage_disjoint_infor_set(G,100,maxiter=1000000)
-        list_of_nb_of_permu += [nb_permut]
-        f.write("iteration : {} , num_info_set : {} , nb_permut : {} \n ".format(i,num_info_set,nb_permut))
-      maximum_nb_of_permu = max(list_of_nb_of_permu)
-      X = range(maximum_nb_of_permu+1)
-
-      f.write("  \n")
-      f.write("(Le nb de permut pour atteindre le nb maxi d'is, le nombre de fois que ce nombre a été affiché) \n")
-      f.write("  \n")
-
-      for i in X:
-        counter = 0
-        for x in list_of_nb_of_permu:
-          if x == i:
-            counter += 1
-        L += [(i,counter)]
-      f.write("{}".format(L))
-      Y = []
-      for i in X:
-        if i == 0:
-          Y += [0]
-        else:
-          Y += [ Y[i-1] + L[i][1] ]
-          
-      for i in X:
-        Y[i] = float(Y[i]/nb_iter) 
-      f.write("  \n")
-      f.write("X = {}".format(X))
-      f.write("  \n")
-      f.write("Y = {}".format(Y))
-      f.close()
-      # list_plot(Y,color='red')
-      G = list_plot(Y,plotjoined=True,color='red')
-      G.save("sage.png")
-      # G.show()
-      return maximum_nb_of_permu
+    for j in xrange(len(Y)):
+      if Y[j] >= 0.9 and Y[j] < 1:
+        y = X[j]
+        break 
+    return (maximum_nb_of_permu,y,x)
 
 
 def infomation_set_distance(G,maxiter, method = "zimmermann"):

@@ -362,7 +362,7 @@ def minimum_distance_one_information_set(C):
     return ub
 
 
-def minimum_distance_brouwer(C, nb_words=1, maxiter=5,verbose=True):
+def minimum_distance_brouwer(C, nb_words=1, maxiter=20,verbose=True):
 
     n,k = C.length(), C.dimension()
     F = C.base_field()
@@ -490,7 +490,7 @@ def minimum_distance_brouwer(C, nb_words=1, maxiter=5,verbose=True):
     return ub
 
 
-def minimum_distance_zimmermann(C,maxiter=5,verbose=True):
+def minimum_distance_zimmermann(C,maxiter=20,verbose=True):
 
     G1 = C.generator_matrix()
     n,k = C.length(), C.dimension()
@@ -718,22 +718,3 @@ def test_lent_gf2():
 
 
 
-
-# creer une seule fonction qui calcul la distance 
-# ameliorer la fonction qui nous permet d enumerer les mots de code 
-# test pour tver le meilleur maxiter
-
-# tt d'abord je dois commencer par ajouter des return dans Brouwer et peut etre ds Zimmer : fait 
-# calculer le maximum_projected pour Brouwer aussi : fait 
-# modifier brouwer pour qu'il affiche des res comme Zimmer : fait
-# supprimer les rang qui sert a rien : fait 
-# ajouter un parametre verbose : fait
-# afficher le lb a chaquer fois qu'on l incremente : fait
-# modifier la fct des informations et pour qu'il renvoie pas de rang 0 : fait
-
-
-# C = codes.random_linear_code(GF(5),54,4)
-
-# Questions :
-# est ce qu'il faut garder uniquement info. set Zimmer et si disj = num is alors on fait appel a brouwer et sinon zimmerman ?
-# Qd qu'il faut appeler one_info_set ?

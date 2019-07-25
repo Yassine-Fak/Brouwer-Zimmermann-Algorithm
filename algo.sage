@@ -121,6 +121,27 @@ def best_permutation(C,nb_iter=1000):
         break 
     return (maximum_nb_of_permu,y,x)
 
+def quotient_in_function_of_the_length():
+    f = open('quotient_in_function_of_the_length', 'w')
+    X = range(70,130,9)
+    Y = []
+    f.write("  \n")
+    f.write("X = {}".format(X))
+    f.write("  \n")
+    for n in X:
+      C = codes.random_linear_code(GF(2), n, 32)
+      Start_Time_min_dist = time.time()
+      C.minimum_distance()
+      Execution_Time_min_dist = time.time() - Start_Time_min_dist
+      Start_Time_Zimmer = time.time()
+      minimum_distance_zimmermann(C)
+      Execution_Time_zimm = time.time() - Start_Time_Zimmer
+      Y += [float(Execution_Time_min_dist/Execution_Time_zimm)]
+    f.write("Y = {}".format(Y))
+    f.close()
+    G = list_plot(Y,plotjoined=True,color='red')
+    G.save("quotient_in_function_of_the_length.png")
+
 
 def infomation_set_distance(G,maxiter, method = "zimmermann"):
   
@@ -556,6 +577,8 @@ def minimum_distance_zimmermann(C,maxiter=20,verbose=True):
           if ub <= lb :
             return ub 
           m += 1
+        if verbose == True:
+          print("We have seen {} codewords ! ".format(binomial(k,w)*num_info_set))
         w += 1
       return ub
     
@@ -625,6 +648,8 @@ def minimum_distance_zimmermann(C,maxiter=20,verbose=True):
         if ub <= lb :
           return ub
         m += 1
+      if verbose == True:
+        print("We have seen {} codewords ! ".format(binomial(k,w)*num_info_set*((q-1)^w)))
       w += 1
     return ub
 
@@ -717,4 +742,5 @@ def test_lent_gf2():
     print ("-------------------")
 
 
+# http://doc.sagemath.org/html/en/reference/functions/sage/functions/other.html
 

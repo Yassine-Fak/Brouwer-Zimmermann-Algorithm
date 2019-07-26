@@ -391,6 +391,7 @@ def minimum_distance_brouwer(C, nb_words=1, maxiter=20,verbose=True):
     F = C.base_field()
     q = F.cardinality()
     w = 1
+    nb_words = 0
 
     if q^k <= nb_words :
       print("Here we use one information set ! ")
@@ -441,11 +442,16 @@ def minimum_distance_brouwer(C, nb_words=1, maxiter=20,verbose=True):
                 maximum_projected = copy(maximum_projected_inter)
                 if verbose == True :
                   print("New Maximum Projected w : {}".format(maximum_projected))
+          nb_words += binomial(k,w)  
           lb += 1
           if verbose == True:
             print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
           if ub <= lb:
+            if verbose == True:
+              print("We have seen {} codewords ! ".format(nb_words))
             return ub
+        if verbose == True:
+          print("We have seen {} codewords ! ".format(nb_words))
         w += 1
       return ub
     
@@ -504,11 +510,16 @@ def minimum_distance_brouwer(C, nb_words=1, maxiter=20,verbose=True):
                 maximum_projected = copy(maximum_projected_inter)
                 if verbose == True :
                   print("New Maximum Projected w : {}".format(maximum_projected))
+        nb_words += binomial(k,w)*((q-1)^w)
         lb += 1
         if verbose == True:
           print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
         if ub <= lb:
+          if verbose == True:
+            print("We have seen {} codewords ! ".format(nb_words))
           return ub
+      if verbose == True:
+        print("We have seen {} codewords ! ".format(nb_words))
       w += 1
     return ub
 
@@ -539,9 +550,7 @@ def minimum_distance_zimmermann(C,maxiter=20,verbose=True):
     if F == GF(2) :
       while lb < ub :
         m = 0
-        # c = 0
         while m < num_info_set:
-          # c += 1
           A = L[m].row(0)
           for i in xrange(1,w):
             A += L[m].row(i)
@@ -582,12 +591,10 @@ def minimum_distance_zimmermann(C,maxiter=20,verbose=True):
               print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
           if ub <= lb :
             if verbose == True:
-              # print("We have seen {} codewords ! ".format(binomial(k,w)*c))
               print("We have seen {} codewords ! ".format(nb_words))
             return ub 
           m += 1
         if verbose == True:
-          # print("We have seen {} codewords ! ".format(binomial(k,w)*num_info_set))
           print("We have seen {} codewords ! ".format(nb_words))
         w += 1
       return ub
@@ -600,9 +607,7 @@ def minimum_distance_zimmermann(C,maxiter=20,verbose=True):
     while lb < ub :
       X = [F.zero()]*k
       m = 0
-      # c = 0
       while m < num_info_set:
-        # c += 1
         A = L[m].row(0)
         for i in xrange(1,w):
           A += L[m].row(i)
@@ -660,12 +665,10 @@ def minimum_distance_zimmermann(C,maxiter=20,verbose=True):
             print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
         if ub <= lb :
           if verbose == True:
-              # print("We have seen {} codewords ! ".format(binomial(k,w)*c*((q-1)^w)))
               print("We have seen {} codewords ! ".format(nb_words))
           return ub
         m += 1
       if verbose == True:
-        # print("We have seen {} codewords ! ".format(binomial(k,w)*num_info_set*((q-1)^w)))
         print("We have seen {} codewords ! ".format(nb_words))
       w += 1
     return ub
@@ -758,6 +761,4 @@ def test_lent_gf2():
     print d
     print ("-------------------")
 
-
-# http://doc.sagemath.org/html/en/reference/functions/sage/functions/other.html
 

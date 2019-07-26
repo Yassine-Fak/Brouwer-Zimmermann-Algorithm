@@ -1,13 +1,13 @@
 
-# X = range(70,130,9)
+#X = range(70,130,9)
 Y = []
 for n in X:
     C = codes.random_linear_code(GF(2), n, 32)
     Y += [float(Execution_Time_min_dist/Execution_Time_zimm)]
 
 
-X = [70, 88, 97, 79, 106, 115, 124, 128, 118, 135, 138]  
-Y = [50.5521, 30.1086180, 18.928670, 10.3747, 2.16161, 1.08537, 1.266, 1.97, 0.9510, 0.8486, 0.85]
+X = [70, 88, 97, 79, 106, 128, 124, 115, 118, 138, 135]  
+Y = [50.5521, 30.1086180, 18.928670, 10.3747, 2.16161, 1.97, 1.266, 1.08537, 0.9510, 0.85, 0.8486]
 
 32*2 = 64
 32*3 = 96
@@ -24,4 +24,4 @@ for i in xrange(len(X)):
     L += [(X[i],Y[i])]
 a = line2d(L)
 a.show()
-a.save("quotient_in_function_of_the_length_GF2.png")
+a.save("quotient_in_function_of_the_length_GF22.png")

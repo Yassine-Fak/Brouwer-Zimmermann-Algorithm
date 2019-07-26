@@ -1,5 +1,5 @@
 
-
+# X = range(70,130,9)
 Y = []
 for n in X:
     C = codes.random_linear_code(GF(2), n, 32)
@@ -16,8 +16,7 @@ Y = [50.5521, 30.1086180, 18.928670, 10.3747, 2.16161, 1.08537, 1.266, 1.97, 0.9
 
 si n est multiple de k on gagne 
 si n%k est tres petit on gagne  24,15,13,11,10,7,6,4,1 .Autrement dit si n%k est au plus 75%
-si c'est 10 de plus on perd 
-si c'est 10 de mopins on perd
+
 
 
 L = []

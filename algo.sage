@@ -123,13 +123,15 @@ def best_permutation(C,nb_iter=1000):
 
 def quotient_in_function_of_the_length():
     f = open('quotient_in_function_of_the_length', 'w')
-    X = range(70,130,9)
+    # X = range(70,130,9)
+    X = [2,3,5,7,9,11,13]
     Y = []
     f.write("  \n")
     f.write("X = {}".format(X))
     f.write("  \n")
     for n in X:
-      C = codes.random_linear_code(GF(2), n, 32)
+      # C = codes.random_linear_code(GF(2), n, 32)
+      C = codes.random_linear_code(GF(n), 40, 10)
       Start_Time_min_dist = time.time()
       C.minimum_distance()
       Execution_Time_min_dist = time.time() - Start_Time_min_dist
@@ -521,6 +523,7 @@ def minimum_distance_zimmermann(C,maxiter=20,verbose=True):
     L = list_of_system_gen_mat_zimm(G2,list_of_ranks)
     ub = n - k + 1
     w = 1
+    nb_words = 0
     print("Code Minimum Weight Zimmermann: length {}, dimension {}".format(n,k))
     print("relative ranks used: {}".format(list_of_ranks))
     num_disj_info_set = 0
@@ -536,7 +539,9 @@ def minimum_distance_zimmermann(C,maxiter=20,verbose=True):
     if F == GF(2) :
       while lb < ub :
         m = 0
+        # c = 0
         while m < num_info_set:
+          # c += 1
           A = L[m].row(0)
           for i in xrange(1,w):
             A += L[m].row(i)
@@ -570,15 +575,20 @@ def minimum_distance_zimmermann(C,maxiter=20,verbose=True):
                   print("New Maximum Projected w : {}".format(maximum_projected))
                 if num_info_set != num_disj_info_set:
                   list_of_ranks, num_info_set = delet_non_contibuting_matrix(list_of_ranks,num_info_set,num_disj_info_set,maximum_projected,verbose)
+          nb_words += binomial(k,w) 
           if max(0,w+1-k+list_of_ranks[m]) != 0:
             lb += 1
             if verbose == True:
               print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
           if ub <= lb :
+            if verbose == True:
+              # print("We have seen {} codewords ! ".format(binomial(k,w)*c))
+              print("We have seen {} codewords ! ".format(nb_words))
             return ub 
           m += 1
         if verbose == True:
-          print("We have seen {} codewords ! ".format(binomial(k,w)*num_info_set))
+          # print("We have seen {} codewords ! ".format(binomial(k,w)*num_info_set))
+          print("We have seen {} codewords ! ".format(nb_words))
         w += 1
       return ub
     
@@ -590,7 +600,9 @@ def minimum_distance_zimmermann(C,maxiter=20,verbose=True):
     while lb < ub :
       X = [F.zero()]*k
       m = 0
+      # c = 0
       while m < num_info_set:
+        # c += 1
         A = L[m].row(0)
         for i in xrange(1,w):
           A += L[m].row(i)
@@ -641,15 +653,20 @@ def minimum_distance_zimmermann(C,maxiter=20,verbose=True):
                   print("New Maximum Projected w : {}".format(maximum_projected))
                 if num_info_set != num_disj_info_set:
                   list_of_ranks, num_info_set = delet_non_contibuting_matrix(list_of_ranks,num_info_set,num_disj_info_set,maximum_projected,verbose)
+        nb_words += binomial(k,w)*((q-1)^w)
         if max(0,w+1-k+list_of_ranks[m]) != 0:
           lb += 1
           if verbose == True:
             print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
         if ub <= lb :
+          if verbose == True:
+              # print("We have seen {} codewords ! ".format(binomial(k,w)*c*((q-1)^w)))
+              print("We have seen {} codewords ! ".format(nb_words))
           return ub
         m += 1
       if verbose == True:
-        print("We have seen {} codewords ! ".format(binomial(k,w)*num_info_set*((q-1)^w)))
+        # print("We have seen {} codewords ! ".format(binomial(k,w)*num_info_set*((q-1)^w)))
+        print("We have seen {} codewords ! ".format(nb_words))
       w += 1
     return ub
 

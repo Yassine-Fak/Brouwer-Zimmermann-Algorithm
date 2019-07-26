@@ -1,0 +1,28 @@
+
+
+Y = []
+for n in X:
+    C = codes.random_linear_code(GF(2), n, 32)
+    Y += [float(Execution_Time_min_dist/Execution_Time_zimm)]
+
+
+X = [70, 88, 97, 79, 106, 115, 124, 128, 118, 135, 138]  
+Y = [50.5521, 30.1086180, 18.928670, 10.3747, 2.16161, 1.08537, 1.266, 1.97, 0.9510, 0.8486, 0.85]
+
+32*2 = 64
+32*3 = 96
+32*4 = 128
+32*5 = 160
+
+si n est multiple de k on gagne 
+si n%k est tres petit on gagne  24,15,13,11,10,7,6,4,1 .Autrement dit si n%k est au plus 75%
+si c'est 10 de plus on perd 
+si c'est 10 de mopins on perd
+
+
+L = []
+for i in xrange(len(X)):
+    L += [(X[i],Y[i])]
+a = line2d(L)
+a.show()
+a.save("quotient_in_function_of_the_length_GF2.png")

@@ -448,10 +448,10 @@ def minimum_distance_brouwer(C, nb_words=1, maxiter=20,verbose=True):
             print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
           if ub <= lb:
             if verbose == True:
-              print("We have seen {} codewords ! ".format(nb_words))
+              print("We have seen {} codewords, which is equals to {}^{} ".format(nb_words,q,log(nb_words,q).numerical_approx()))
             return ub
         if verbose == True:
-          print("We have seen {} codewords ! ".format(nb_words))
+          print("We have seen {} codewords, which is equals to {}^{} ".format(nb_words,q,log(nb_words,q).numerical_approx()))
         w += 1
       return ub
     
@@ -516,10 +516,10 @@ def minimum_distance_brouwer(C, nb_words=1, maxiter=20,verbose=True):
           print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
         if ub <= lb:
           if verbose == True:
-            print("We have seen {} codewords ! ".format(nb_words))
+            print("We have seen {} codewords, which is equals to {}^{} ".format(nb_words,q,log(nb_words,q).numerical_approx()))
           return ub
       if verbose == True:
-        print("We have seen {} codewords ! ".format(nb_words))
+        print("We have seen {} codewords, which is equals to {}^{} ".format(nb_words,q,log(nb_words,q).numerical_approx()))
       w += 1
     return ub
 
@@ -591,11 +591,11 @@ def minimum_distance_zimmermann(C,maxiter=20,verbose=True):
               print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
           if ub <= lb :
             if verbose == True:
-              print("We have seen {} codewords ! ".format(nb_words))
+              print("We have seen {} codewords, which is equals to {}^{} ".format(nb_words,q,log(nb_words,q).numerical_approx()))
             return ub 
           m += 1
         if verbose == True:
-          print("We have seen {} codewords ! ".format(nb_words))
+          print("We have seen {} codewords, which is equals to {}^{} ".format(nb_words,q,log(nb_words,q).numerical_approx()))
         w += 1
       return ub
     
@@ -665,11 +665,11 @@ def minimum_distance_zimmermann(C,maxiter=20,verbose=True):
             print("w : {}, lower: {}, upper: {}".format(w,lb,ub))
         if ub <= lb :
           if verbose == True:
-              print("We have seen {} codewords ! ".format(nb_words))
+            print("We have seen {} codewords, which is equals to {}^{} ".format(nb_words,q,log(nb_words,q).numerical_approx()))
           return ub
         m += 1
       if verbose == True:
-        print("We have seen {} codewords ! ".format(nb_words))
+        print("We have seen {} codewords, which is equals to {}^{} ".format(nb_words,q,log(nb_words,q).numerical_approx()))
       w += 1
     return ub
 
